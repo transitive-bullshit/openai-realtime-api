@@ -5,6 +5,7 @@ export interface Event {
   type: string
 }
 
+// See https://platform.openai.com/docs/guides/realtime/events
 export namespace RealtimeClientEvents {
   /** Event types sent by the client. */
   export type ClientEventType =
@@ -103,6 +104,7 @@ export namespace RealtimeClientEvents {
   }
 }
 
+// See // See https://platform.openai.com/docs/guides/realtime/events
 export namespace RealtimeServerEvents {
   /** Event types sent by the server. */
   export type ServerEventType =

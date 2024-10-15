@@ -1,3 +1,11 @@
+import { customAlphabet } from 'nanoid'
+
+export const isBrowser = !!(globalThis as any).document
+
+export function hasNativeWebSocket(): boolean {
+  return !!globalThis.WebSocket
+}
+
 export function getEnv(name: string): string | undefined {
   try {
     return typeof process !== 'undefined'
@@ -125,15 +133,17 @@ export function mergeInt16Arrays(
   return newValues
 }
 
+// base58; non-repeating chars
+const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+const generateIdImpl = customAlphabet(alphabet, 21)
+
 /**
  * Generates an id to send with events and messages.
  */
-export function generateId(prefix: string, length = 21): string {
-  // base58; non-repeating chars
-  const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-  const str = Array.from({ length: length - prefix.length })
-    .fill(0)
-    .map((_) => chars[Math.floor(Math.random() * chars.length)])
-    .join('')
-  return `${prefix}${str}`
+export function generateId(prefix: string, size = 21): string {
+  const id = generateIdImpl(size)
+  return `${prefix}${id}`
 }
+
+export const sleep = (t: number) =>
+  new Promise<void>((r) => setTimeout(() => r(), t))

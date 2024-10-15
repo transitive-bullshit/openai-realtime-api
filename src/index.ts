@@ -1,4 +1,7 @@
+export * from './api'
+export * from './client'
 export * from './conversation'
+export * from './event-handler'
 export type * from './events'
 export type * from './types'
 export * from './utils'

@@ -43,13 +43,19 @@ export namespace Realtime {
 
   export interface TurnDetection {
     type: 'server_vad'
+
+    /** 0.0 to 1.0 */
     threshold?: number
+
+    /** How much audio to include in the audio stream before the speech starts. */
     prefix_padding_ms?: number
+
+    /** How long to wait to mark the speech as stopped. */
     silence_duration_ms?: number
   }
 
   export interface ToolDefinition {
-    type?: 'function'
+    type: 'function'
     name: string
     description: string
     parameters: { [key: string]: any }
@@ -214,27 +220,6 @@ export namespace Realtime {
     | FunctionCallItem
     | FunctionCallOutputItem
 
-  export interface FormattedTool {
-    type: 'function'
-    name: string
-    call_id: string
-    arguments: string
-  }
-
-  export interface FormattedProperty {
-    audio: Int16Array
-    text: string
-    transcript: string
-    tool?: FormattedTool
-    output?: string
-    file?: any
-  }
-
-  /** Local item used strictly for convenience and not part of the API. */
-  export type FormattedItem = Item & {
-    formatted: FormattedProperty
-  }
-
   export interface Usage {
     total_tokens: number
     input_tokens: number
@@ -337,3 +322,47 @@ export namespace Realtime {
     reset_seconds: number
   }
 }
+
+// NOTE: all types outside of the Realtime namespace are local to this project
+// and not part of the official API.
+
+export type MaybePromise<T> = T | Promise<T>
+
+export interface FormattedTool {
+  type: 'function'
+  name: string
+  call_id: string
+  arguments: string
+}
+
+export interface FormattedProperty {
+  audio: Int16Array
+  text: string
+  transcript: string
+  tool?: FormattedTool
+  output?: string
+  file?: any
+}
+
+/** Local item used strictly for convenience and not part of the API. */
+export type FormattedItem = Realtime.Item & {
+  formatted: FormattedProperty
+}
+
+/** Local item used strictly for convenience and not part of the API. */
+export type MaybeFormattedItem = Realtime.Item & {
+  formatted?: FormattedProperty
+}
+
+export interface EventHandlerResult {
+  item?: MaybeFormattedItem
+  delta?: {
+    transcript?: string
+    audio?: Int16Array
+    text?: string
+    arguments?: string
+  }
+  response?: Realtime.Response
+}
+
+export type ToolHandler = (params: any) => MaybePromise<any>

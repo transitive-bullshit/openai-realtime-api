@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { RealtimeServerEvents } from './events'
-import type { Realtime } from './types'
+import type { EventHandlerResult, FormattedItem, Realtime } from './types'
 import { assert, base64ToArrayBuffer, mergeInt16Arrays } from './utils'
 
 /**
@@ -10,8 +10,10 @@ import { assert, base64ToArrayBuffer, mergeInt16Arrays } from './utils'
 export class RealtimeConversation {
   readonly defaultFrequency = 24_000 // 24,000 Hz
 
-  itemLookup: Record<string, Realtime.FormattedItem> = {}
-  items: Realtime.FormattedItem[] = []
+  readonly frequency: number
+
+  itemLookup: Record<string, FormattedItem> = {}
+  items: FormattedItem[] = []
   responseLookup: Record<string, Realtime.Response> = {}
   responses: Realtime.Response[] = []
   queuedSpeechItems: Record<
@@ -21,19 +23,79 @@ export class RealtimeConversation {
   queuedTranscriptItems: Record<string, { transcript: string }> = {}
   queuedInputAudio?: Int16Array
 
-  constructor() {
+  constructor({
+    frequency = this.defaultFrequency
+  }: {
+    frequency?: number
+  } = {}) {
+    assert(frequency > 0, `Invalid frequency: ${frequency}`)
+
+    this.frequency = frequency
     this.clear()
   }
 
+  /**
+   * Clears the conversation history and resets to defaults.
+   */
+  clear() {
+    this.itemLookup = {}
+    this.items = []
+    this.responseLookup = {}
+    this.responses = []
+    this.queuedSpeechItems = {}
+    this.queuedTranscriptItems = {}
+    this.queuedInputAudio = undefined
+  }
+
+  /**
+   * Queue input audio for manual speech event.
+   */
+  queueInputAudio(inputAudio: Int16Array) {
+    this.queuedInputAudio = inputAudio
+  }
+
+  /**
+   * Process an event from the WebSocket server and compose items.
+   */
+  processEvent(
+    event: RealtimeServerEvents.ServerEvent,
+    ...args: any[]
+  ): EventHandlerResult {
+    assert(event.event_id, `Missing "event_id" on event`)
+    assert(event.type, `Missing "type" on event`)
+
+    const eventProcessor = this.EventProcessors[event.type]
+    assert(eventProcessor, `Missing event processor for "${event.type}"`)
+
+    return eventProcessor.call(this, event, ...args)
+  }
+
+  /**
+   * Retrieves an item by ID.
+   */
+  getItem(id: string): Realtime.Item | undefined {
+    return this.itemLookup[id]
+  }
+
+  /**
+   * Retrieves all items in the conversation.
+   */
+  getItems(): Realtime.Item[] {
+    return this.items.slice()
+  }
+
+  /** Event handlers. */
   EventProcessors: Partial<
-    Record<RealtimeServerEvents.ServerEventType, (...args: any[]) => any>
+    Record<
+      RealtimeServerEvents.ServerEventType,
+      (...args: any[]) => EventHandlerResult
+    >
   > = {
     'conversation.item.created': (
       event: RealtimeServerEvents.ConversationItemCreatedEvent
     ) => {
       const { item } = event
-      // deep copy values
-      const newItem: Realtime.FormattedItem = {
+      const newItem: FormattedItem = {
         ...structuredClone(item),
         formatted: {
           audio: new Int16Array(0),
@@ -95,7 +157,7 @@ export class RealtimeConversation {
         newItem.formatted.output = newItem.output
       }
 
-      return { item: newItem, delta: null }
+      return { item: newItem }
     },
 
     'conversation.item.truncated': (
@@ -107,11 +169,11 @@ export class RealtimeConversation {
         throw new Error(`item.truncated: Item "${item_id}" not found`)
       }
 
-      const endIndex = Math.floor((audio_end_ms * this.defaultFrequency) / 1000)
+      const endIndex = Math.floor((audio_end_ms * this.frequency) / 1000)
       item.formatted.transcript = ''
       item.formatted.audio = item.formatted.audio!.slice(0, endIndex)
 
-      return { item, delta: null }
+      return { item }
     },
 
     'conversation.item.deleted': (
@@ -130,7 +192,7 @@ export class RealtimeConversation {
         this.items.splice(index, 1)
       }
 
-      return { item, delta: null }
+      return { item }
     },
 
     'conversation.item.input_audio_transcription.completed': (
@@ -150,7 +212,7 @@ export class RealtimeConversation {
           transcript: formattedTranscript
         }
 
-        return { item: null, delta: null }
+        return {}
       } else {
         if (item.content[content_index]) {
           ;(
@@ -166,8 +228,9 @@ export class RealtimeConversation {
       event: RealtimeServerEvents.InputAudioBufferSpeechStartedEvent
     ) => {
       const { item_id, audio_start_ms } = event
+      const item = this.itemLookup[item_id]
       this.queuedSpeechItems[item_id] = { audio_start_ms }
-      return { item: null, delta: null }
+      return { item }
     },
 
     'input_audio_buffer.speech_stopped': (
@@ -175,6 +238,8 @@ export class RealtimeConversation {
       inputAudioBuffer: Int16Array
     ) => {
       const { item_id, audio_end_ms } = event
+      const item = this.itemLookup[item_id]
+
       if (!this.queuedSpeechItems[item_id]) {
         this.queuedSpeechItems[item_id] = { audio_start_ms: audio_end_ms }
       }
@@ -185,16 +250,16 @@ export class RealtimeConversation {
 
       if (inputAudioBuffer) {
         const startIndex = Math.floor(
-          (speech.audio_start_ms * this.defaultFrequency) / 1000
+          (speech.audio_start_ms * this.frequency) / 1000
         )
         const endIndex = Math.floor(
-          (speech.audio_end_ms * this.defaultFrequency) / 1000
+          (speech.audio_end_ms * this.frequency) / 1000
         )
 
         speech.audio = inputAudioBuffer.slice(startIndex, endIndex)
       }
 
-      return { item: null, delta: null }
+      return { item }
     },
 
     'response.created': (event: RealtimeServerEvents.ResponseCreatedEvent) => {
@@ -205,7 +270,7 @@ export class RealtimeConversation {
         this.responses.push(response)
       }
 
-      return { item: null, delta: null }
+      return { response }
     },
 
     'response.output_item.added': (
@@ -221,7 +286,7 @@ export class RealtimeConversation {
       }
 
       response.output.push(item)
-      return { item: null, delta: null }
+      return { item, response }
     },
 
     'response.output_item.done': (
@@ -240,7 +305,7 @@ export class RealtimeConversation {
       }
 
       foundItem.status = item.status
-      return { item: foundItem, delta: null }
+      return { item: foundItem }
     },
 
     'response.content_part.added': (
@@ -255,7 +320,7 @@ export class RealtimeConversation {
       }
 
       item.content.push(part as any)
-      return { item, delta: null }
+      return { item }
     },
 
     'response.audio_transcript.delta': (
@@ -279,14 +344,14 @@ export class RealtimeConversation {
     'response.audio.delta': (
       event: RealtimeServerEvents.ResponseAudioDeltaEvent
     ) => {
-      const { item_id, delta } = event
+      const { item_id, content_index: _, delta } = event
       const item = this.itemLookup[item_id]
       if (!item) {
         throw new Error(`response.audio.delta: Item "${item_id}" not found`)
       }
 
       // This never gets renderered, we care about the file data instead
-      // item.content[content_index].audio += delta;
+      // (item.content[content_index] as Realtime.AudioContentPart)!.audio += delta;
 
       const arrayBuffer = base64ToArrayBuffer(delta)
       const appendValues = new Int16Array(arrayBuffer)
@@ -329,63 +394,5 @@ export class RealtimeConversation {
 
       return { item, delta: { arguments: delta } }
     }
-  }
-
-  /**
-   * Clears the conversation history and resets to defaults.
-   */
-  clear() {
-    this.itemLookup = {}
-    this.items = []
-    this.responseLookup = {}
-    this.responses = []
-    this.queuedSpeechItems = {}
-    this.queuedTranscriptItems = {}
-    this.queuedInputAudio = undefined
-  }
-
-  /**
-   * Queue input audio for manual speech event
-   */
-  queueInputAudio(inputAudio: Int16Array) {
-    this.queuedInputAudio = inputAudio
-  }
-
-  /**
-   * Process an event from the WebSocket server and compose items
-   */
-  processEvent(event: RealtimeServerEvents.ServerEvent, ...args: any[]) {
-    if (!event.event_id) {
-      console.error(event)
-      throw new Error(`Missing "event_id" on event`)
-    }
-
-    if (!event.type) {
-      console.error(event)
-      throw new Error(`Missing "type" on event`)
-    }
-
-    const eventProcessor = this.EventProcessors[event.type]
-    if (!eventProcessor) {
-      throw new Error(
-        `Missing realtime server event processor for "${event.type}"`
-      )
-    }
-
-    return eventProcessor.call(this, event, ...args)
-  }
-
-  /**
-   * Retrieves an item by ID
-   */
-  getItem(id: string): Realtime.Item | undefined {
-    return this.itemLookup[id]
-  }
-
-  /**
-   * Retrieves all items in the conversation
-   */
-  getItems(): Realtime.Item[] {
-    return this.items.slice()
   }
 }
