@@ -1,0 +1,7 @@
+{
+  "root": true,
+  "extends": ["@fisch0920/eslint-config/node"],
+  "rules": {
+    "unicorn/no-array-reduce": "off"
+  }
+}
