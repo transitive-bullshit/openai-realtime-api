@@ -22,6 +22,9 @@ const fixtureData = await Promise.all(
 
 test(
   'e2e',
+  {
+    timeout: 60_000
+  },
   async () => {
     const events: any[] = []
     const client = new RealtimeClient({
@@ -104,8 +107,5 @@ test(
     ).toHaveLength(1)
 
     console.log(JSON.stringify(events, null, 2))
-  },
-  {
-    timeout: 120_000
   }
 )
