@@ -44,6 +44,7 @@
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/node": "^22.4.0",
     "@types/ws": "^8.5.12",
+    "audio-decode": "^2.2.2",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "npm-run-all2": "^6.2.2",

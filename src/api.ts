@@ -4,7 +4,7 @@ import type { WebSocket as WS } from 'ws'
 
 import type { RealtimeClientEvents, RealtimeServerEvents } from './events'
 import { RealtimeEventHandler } from './event-handler'
-import { generateId, getEnv, isBrowser } from './utils'
+import { generateId, getEnv, isBrowser, trimDebugEvent } from './utils'
 
 /**
  * The RealtimeAPI class handles low-level communication with the OpenAI
@@ -177,20 +177,17 @@ export class RealtimeAPI extends RealtimeEventHandler {
   }
 
   /**
-   * Receives an event from WebSocket and dispatches:
-   * - "server.{eventName}"
-   * - "server.*"
+   * Receives an event from WebSocket and dispatches related events.
    */
   receive(eventName: RealtimeServerEvents.ServerEventType, event: any) {
     this._log('received:', eventName, event)
+    this.dispatch(eventName, event)
     this.dispatch(`server.${eventName}`, event)
     this.dispatch('server.*', event)
   }
 
   /**
-   * Sends an event to the underlying WebSocket and dispatches:
-   * - "client.{eventName}"
-   * - "client.*"
+   * Sends an event to the underlying WebSocket and dispatches related events.
    */
   send(eventName: RealtimeClientEvents.ClientEventType, data: any = {}) {
     if (!this.isConnected) {
@@ -206,6 +203,7 @@ export class RealtimeAPI extends RealtimeEventHandler {
       type: eventName,
       ...data
     }
+    this.dispatch(eventName, event)
     this.dispatch(`client.${eventName}`, event)
     this.dispatch('client.*', event)
     this._log('sent:', eventName, event)
@@ -219,7 +217,7 @@ export class RealtimeAPI extends RealtimeEventHandler {
     const date = new Date().toISOString()
     const logs = [`[Websocket/${date}]`].concat(args).map((arg) => {
       if (typeof arg === 'object' && arg !== null) {
-        return JSON.stringify(arg, null, 2)
+        return JSON.stringify(trimDebugEvent(arg), null, 2)
       } else {
         return arg
       }

@@ -38,7 +38,6 @@ export namespace Realtime {
 
   export interface AudioTranscription {
     model: AudioTranscriptionModel
-    enabled?: boolean
   }
 
   export interface TurnDetection {
@@ -120,6 +119,15 @@ export namespace Realtime {
   export interface BaseContentPart {
     /** The type of the content. */
     type: ContentPartType
+
+    /** Text content for "text" and "input_text" content parts. */
+    text?: string
+
+    /** Base64-encoded audio data. */
+    audio?: string
+
+    /** Optional text transcript. */
+    transcript?: string | null
   }
 
   export interface InputTextContentPart extends BaseContentPart {

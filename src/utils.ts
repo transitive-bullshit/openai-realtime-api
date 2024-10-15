@@ -147,3 +147,39 @@ export function generateId(prefix: string, size = 21): string {
 
 export const sleep = (t: number) =>
   new Promise<void>((r) => setTimeout(() => r(), t))
+
+export function trimDebugEvent(
+  event?: any,
+  {
+    maxLimit = 200
+  }: {
+    maxLimit?: number
+  } = {}
+): any {
+  if (!event) return event
+
+  const e = structuredClone(event)
+
+  if (e.item?.content?.find((c: any) => c.audio)) {
+    e.item.content = e.item.content.map(({ audio, c }: any) => {
+      if (audio) {
+        return {
+          ...c,
+          audio: '<base64 redacted...>'
+        }
+      } else {
+        return c
+      }
+    })
+  }
+
+  if (e.audio?.length > maxLimit) {
+    e.audio = '<base64 redacted...>'
+  }
+
+  if (e.delta?.length > maxLimit) {
+    e.delta = e.delta.slice(0, maxLimit) + '... (truncated)'
+  }
+
+  return e
+}

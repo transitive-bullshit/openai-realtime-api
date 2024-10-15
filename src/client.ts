@@ -19,7 +19,12 @@ import { arrayBufferToBase64, assert, mergeInt16Arrays, sleep } from './utils'
  * OpenAI Realtime API. It handles connection, configuration, conversation
  * updates, and server event handling.
  */
-export class RealtimeClient extends RealtimeEventHandler<string, Event> {
+export class RealtimeClient extends RealtimeEventHandler<
+  | RealtimeClientEvents.ClientEventType
+  | RealtimeServerEvents.ServerEventType
+  | (string & {}),
+  Event
+> {
   readonly defaultSessionConfig: Realtime.SessionConfig
   sessionConfig: Realtime.SessionConfig
 
@@ -39,8 +44,13 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
   constructor({
     sessionConfig,
     ...apiParams
-  }: ConstructorParameters<typeof RealtimeAPI>[0] & {
-    sessionConfig?: Omit<Realtime.SessionConfig, 'tools'>
+  }: {
+    sessionConfig?: Partial<Omit<Realtime.SessionConfig, 'tools'>>
+    apiKey?: string
+    model?: string
+    url?: string
+    dangerouslyAllowAPIKeyInBrowser?: boolean
+    debug?: boolean
   } = {}) {
     super()
 
@@ -51,15 +61,15 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
       input_audio_format: 'pcm16',
       output_audio_format: 'pcm16',
       input_audio_transcription: {
-        model: 'whisper-1',
-        enabled: true
+        model: 'whisper-1'
       },
-      turn_detection: {
-        type: 'server_vad',
-        threshold: 0.5,
-        prefix_padding_ms: 300,
-        silence_duration_ms: 200
-      },
+      turn_detection: null,
+      // turn_detection: {
+      //   type: 'server_vad',
+      //   threshold: 0.5,
+      //   prefix_padding_ms: 300,
+      //   silence_duration_ms: 200
+      // },
       tools: [],
       tool_choice: 'auto',
       temperature: 0.8,
@@ -94,21 +104,19 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
   protected _addAPIEventHandlers() {
     // Event Logging handlers
     this.api.on('client.*', (event: RealtimeClientEvents.ClientEvent) => {
-      const realtimeEvent = {
+      this.dispatch('realtime.event', {
         time: new Date().toISOString(),
         source: 'client',
         event
-      }
-      this.dispatch('realtime.event', realtimeEvent)
+      })
     })
 
     this.api.on('server.*', (event: RealtimeServerEvents.ServerEvent) => {
-      const realtimeEvent = {
+      this.dispatch('realtime.event', {
         time: new Date().toISOString(),
         source: 'server',
         event
-      }
-      this.dispatch('realtime.event', realtimeEvent)
+      })
     })
 
     // Handles session created event
@@ -176,8 +184,9 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
     )
     this.api.on(
       'server.input_audio_buffer.speech_stopped',
-      (event: RealtimeServerEvents.InputAudioBufferSpeechStoppedEvent) =>
+      (event: RealtimeServerEvents.InputAudioBufferSpeechStoppedEvent) => {
         handler(event, this.inputAudioBuffer)
+      }
     )
 
     // Handlers to update application state

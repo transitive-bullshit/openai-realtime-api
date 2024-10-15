@@ -69,8 +69,8 @@ export class RealtimeEventHandler<
   /**
    * Waits for next event of a specific type and returns the payload
    */
-  async waitForNext(
-    eventName: EventType,
+  async waitForNext<TEvent extends EventType>(
+    eventName: TEvent,
     { timeoutMs }: { timeoutMs?: number } = {}
   ): Promise<any | null> {
     const t0 = Date.now()

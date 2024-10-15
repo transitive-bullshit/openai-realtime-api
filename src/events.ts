@@ -19,6 +19,18 @@ export namespace RealtimeClientEvents {
     | 'response.create'
     | 'response.cancel'
 
+  export type ClientEventMap = {
+    'session.update': SessionUpdateEvent
+    'input_audio_buffer.append': InputAudioBufferAppendEvent
+    'input_audio_buffer.commit': InputAudioBufferCommitEvent
+    'input_audio_buffer.clear': InputAudioBufferClearEvent
+    'conversation.item.create': ConversationItemCreateEvent
+    'conversation.item.truncate': ConversationItemTruncateEvent
+    'conversation.item.delete': ConversationItemDeleteEvent
+    'response.create': ResponseCreateEvent
+    'response.cancel': ResponseCancelEvent
+  }
+
   export interface ClientEvent extends Event {
     /** The event type. */
     type: ClientEventType
@@ -136,6 +148,37 @@ export namespace RealtimeServerEvents {
     | 'response.function_call_arguments.delta'
     | 'response.function_call_arguments.done'
     | 'rate_limits.updated'
+
+  export type ServerEventMap = {
+    error: ErrorEvent
+    'session.created': SessionCreatedEvent
+    'session.updated': SessionUpdatedEvent
+    'conversation.created': ConversationCreatedEvent
+    'conversation.item.created': ConversationItemCreatedEvent
+    'conversation.item.input_audio_transcription.completed': ConversationItemInputAudioTranscriptionCompletedEvent
+    'conversation.item.input_audio_transcription.failed': ConversationItemInputAudioTranscriptionFailedEvent
+    'conversation.item.truncated': ConversationItemTruncatedEvent
+    'conversation.item.deleted': ConversationItemDeletedEvent
+    'input_audio_buffer.committed': InputAudioBufferCommittedEvent
+    'input_audio_buffer.cleared': InputAudioBufferClearedEvent
+    'input_audio_buffer.speech_started': InputAudioBufferSpeechStartedEvent
+    'input_audio_buffer.speech_stopped': InputAudioBufferSpeechStoppedEvent
+    'response.created': ResponseCreatedEvent
+    'response.done': ResponseDoneEvent
+    'response.output_item.added': ResponseOutputItemAddedEvent
+    'response.output_item.done': ResponseOutputItemDoneEvent
+    'response.content_part.added': ResponseContentPartItemAddedEvent
+    'response.content_part.done': ResponseContentPartItemDoneEvent
+    'response.text.delta': ResponseTextDeltaEvent
+    'response.text.done': ResponseTextDoneEvent
+    'response.audio_transcript.delta': ResponseAudioTranscriptDeltaEvent
+    'response.audio_transcript.done': ResponseAudioTranscriptDoneEvent
+    'response.audio.delta': ResponseAudioDeltaEvent
+    'response.audio.done': ResponseAudioDoneEvent
+    'response.function_call_arguments.delta': ResponseFunctionCallArgumentsDeltaEvent
+    'response.function_call_arguments.done': ResponseFunctionCallArgumentsDoneEvent
+    'rate_limits.updated': RateLimitsUpdatedEvent
+  }
 
   export interface ServerEvent extends Event {
     /** The event type. */
