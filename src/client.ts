@@ -1,8 +1,4 @@
-import type {
-  Event,
-  RealtimeClientEvents,
-  RealtimeServerEvents
-} from './events'
+import type { RealtimeClientEvents, RealtimeServerEvents } from './events'
 import type {
   EventHandlerResult,
   FormattedTool,
@@ -23,7 +19,7 @@ export class RealtimeClient extends RealtimeEventHandler<
   | RealtimeClientEvents.ClientEventType
   | RealtimeServerEvents.ServerEventType
   | (string & {}),
-  Event
+  any
 > {
   readonly defaultSessionConfig: Realtime.SessionConfig
   sessionConfig: Realtime.SessionConfig

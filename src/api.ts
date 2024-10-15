@@ -4,7 +4,13 @@ import type { WebSocket as WS } from 'ws'
 
 import type { RealtimeClientEvents, RealtimeServerEvents } from './events'
 import { RealtimeEventHandler } from './event-handler'
-import { generateId, getEnv, isBrowser, trimDebugEvent } from './utils'
+import {
+  generateId,
+  getEnv,
+  hasNativeWebSocket,
+  isBrowser,
+  trimDebugEvent
+} from './utils'
 
 /**
  * The RealtimeAPI class handles low-level communication with the OpenAI
@@ -57,7 +63,7 @@ export class RealtimeAPI extends RealtimeEventHandler {
   }
 
   /**
-   * Connects to Realtime API Websocket Server
+   * Connects to Realtime API WebSocket Server.
    */
   async connect() {
     if (this.isConnected) {
@@ -68,17 +74,18 @@ export class RealtimeAPI extends RealtimeEventHandler {
       console.warn(`No apiKey provided for connection to "${this.url}"`)
     }
 
-    const url = `${this.url}${this.model ? `?model=${this.model}` : ''}`
+    const url = new URL(this.url)
+    url.searchParams.set('model', this.model)
 
-    if (isBrowser) {
-      if (this.apiKey) {
+    if (hasNativeWebSocket()) {
+      if (isBrowser && this.apiKey) {
         console.warn(
           'Warning: Connecting using API key in the browser, this is not recommended'
         )
       }
 
       const ws = new WebSocket(
-        url,
+        url.toString(),
         [
           'realtime',
           this.apiKey ? `openai-insecure-api-key.${this.apiKey}` : undefined,
@@ -121,11 +128,18 @@ export class RealtimeAPI extends RealtimeEventHandler {
     } else {
       // Node.js
       const wsModule = await import('ws')
-      const ws: WS = new wsModule.WebSocket(url, [], {
+      const ws: WS = new wsModule.WebSocket(url.toString(), [], {
+        // Add auth headers
         finishRequest: (request: ClientRequest) => {
-          // Auth
-          request.setHeader('Authorization', `Bearer ${this.apiKey}`)
           request.setHeader('OpenAI-Beta', 'realtime=v1')
+
+          if (this.apiKey) {
+            request.setHeader('Authorization', `Bearer ${this.apiKey}`)
+
+            // Needed for Azure OpenAI
+            request.setHeader('api-key', this.apiKey)
+          }
+
           request.end()
         }
         // TODO: this `any` is a workaround for `@types/ws` being out-of-date.

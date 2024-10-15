@@ -188,7 +188,7 @@ export class RealtimeConversation {
       delete this.itemLookup[item.id]
       const index = this.items.indexOf(item)
 
-      if (index > -1) {
+      if (index >= 0) {
         this.items.splice(index, 1)
       }
 
@@ -350,7 +350,7 @@ export class RealtimeConversation {
         throw new Error(`response.audio.delta: Item "${item_id}" not found`)
       }
 
-      // This never gets renderered, we care about the file data instead
+      // This never gets renderered; we care about the formatted data instead.
       // (item.content[content_index] as Realtime.AudioContentPart)!.audio += delta;
 
       const arrayBuffer = base64ToArrayBuffer(delta)

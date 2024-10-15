@@ -176,8 +176,8 @@ export function trimDebugEvent(
     })
   }
 
-  if (e.audio?.length > maxLimit) {
-    e.audio = '<base64 redacted...>'
+  if (e.audio) {
+    e.audio = '<audio redacted...>'
   }
 
   if (e.delta?.length > maxLimit) {

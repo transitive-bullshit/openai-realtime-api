@@ -9,12 +9,16 @@
   <a href="https://prettier.io"><img alt="Prettier Code Formatting" src="https://img.shields.io/badge/code_style-prettier-brightgreen.svg" /></a>
 </p>
 
-- [Intro](#intro)
+- [TODO](#todo)
 - [License](#license)
 
-## Intro
+## TODO
 
 **TODO: this project is an active WIP.**
+
+- test tools
+- example next.js app
+- readme
 
 ## License
 

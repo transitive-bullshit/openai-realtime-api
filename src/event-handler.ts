@@ -1,14 +1,11 @@
 import type { MaybePromise } from './types'
-import { sleep } from './utils'
 
-export type EventHandlerCallback<EventData = any> = (
+export type EventHandlerCallback<EventData> = (
   event: EventData
 ) => MaybePromise<unknown>
 
 /**
- * Inherited class for RealtimeAPI and RealtimeClient
- * Adds basic event handling
- * @class
+ * Basic event handler.
  */
 export class RealtimeEventHandler<
   EventType extends string = string,
@@ -39,7 +36,7 @@ export class RealtimeEventHandler<
    * Adds a listener for a single occurrence of an event.
    */
   once(eventName: EventType, callback: EventHandlerCallback<EventData>) {
-    const onceCallback = (event: any) => {
+    const onceCallback = (event: EventData) => {
       this.off(eventName, onceCallback)
       return callback(event)
     }
@@ -47,7 +44,7 @@ export class RealtimeEventHandler<
   }
 
   /**
-   * Turns off event listening for specific events.
+   * Removes a listener for an event.
    * Calling without a callback will remove all listeners for the event.
    */
   off(eventName: EventType, callback?: EventHandlerCallback<EventData>) {
@@ -67,36 +64,28 @@ export class RealtimeEventHandler<
   }
 
   /**
-   * Waits for next event of a specific type and returns the payload
+   * Waits for next event of a specific type and returns the payload.
    */
-  async waitForNext<TEvent extends EventType>(
-    eventName: TEvent,
+  async waitForNext(
+    eventName: EventType,
     { timeoutMs }: { timeoutMs?: number } = {}
-  ): Promise<any | null> {
-    const t0 = Date.now()
+  ): Promise<EventData> {
+    return new Promise((resolve, reject) => {
+      this.once(eventName, resolve)
 
-    let nextEvent: any
-    this.once(eventName, (event) => {
-      nextEvent = event
-    })
-
-    while (!nextEvent) {
       if (timeoutMs !== undefined) {
-        const t1 = Date.now()
-        if (t1 - t0 > timeoutMs) {
-          return null
-        }
+        setTimeout(
+          () => reject(new Error(`Timeout waiting for "${eventName}"`)),
+          timeoutMs
+        )
       }
-      await sleep(1)
-    }
-
-    return nextEvent
+    })
   }
 
   /**
    * Executes all events handlers in the order they were added.
    */
-  dispatch(eventName: EventType, event: any) {
+  dispatch(eventName: EventType, event: EventData) {
     const handlers = this.eventHandlers[eventName] || []
     for (const handler of handlers) {
       handler(event)
