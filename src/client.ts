@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/consistent-function-scoping */
 import type {
   Event,
   RealtimeClientEvents,
@@ -123,14 +122,16 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
     }
 
     const handlerWithDispatch = (event: any, ...args: any[]) => {
-      const { item, delta } = handler(event, ...args)
-      if (item) {
-        // FIXME: If statement is only here because item.input_audio_transcription.completed
-        //        can fire before `item.created`, resulting in empty item.
-        //        This happens in VAD mode with empty audio
-        this.dispatch('conversation.updated', { item, delta })
+      const res = handler(event, ...args)
+
+      if (res.item) {
+        // FIXME: This is only here because `item.input_audio_transcription.completed`
+        // can fire before `item.created`, resulting in empty item. This happens in
+        // VAD mode with empty audio.
+        this.dispatch('conversation.updated', res)
       }
-      return { item, delta }
+
+      return res
     }
 
     const callTool = async (tool: FormattedTool) => {
@@ -447,7 +448,7 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
    * Utility for waiting for the next `conversation.item.completed` event to be
    * triggered by the server.
    */
-  async waitForNextCompletedItem() {
+  async waitForNextCompletedItem(): Promise<Realtime.Item> {
     const event = await this.waitForNext('conversation.item.completed')
     const { item } = event
     return item
