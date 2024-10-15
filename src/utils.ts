@@ -148,6 +148,9 @@ export function generateId(prefix: string, size = 21): string {
 export const sleep = (t: number) =>
   new Promise<void>((r) => setTimeout(() => r(), t))
 
+/**
+ * Trims an event's content for debugging purposes to make logs easier to read.
+ */
 export function trimDebugEvent(
   event?: any,
   {
