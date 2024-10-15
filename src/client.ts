@@ -15,6 +15,11 @@ import { RealtimeConversation } from './conversation'
 import { RealtimeEventHandler } from './event-handler'
 import { arrayBufferToBase64, assert, mergeInt16Arrays, sleep } from './utils'
 
+/**
+ * The RealtimeClient class is the main interface for interacting with the
+ * OpenAI Realtime API. It handles connection, configuration, conversation
+ * updates, and server event handling.
+ */
 export class RealtimeClient extends RealtimeEventHandler<string, Event> {
   readonly defaultSessionConfig: Realtime.SessionConfig
   sessionConfig: Realtime.SessionConfig
@@ -33,16 +38,9 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
   >
 
   constructor({
-    url,
-    apiKey,
-    dangerouslyAllowAPIKeyInBrowser,
-    debug,
-    sessionConfig
-  }: {
-    url?: string
-    apiKey?: string
-    dangerouslyAllowAPIKeyInBrowser?: boolean
-    debug?: boolean
+    sessionConfig,
+    ...apiParams
+  }: ConstructorParameters<typeof RealtimeAPI>[0] & {
     sessionConfig?: Omit<Realtime.SessionConfig, 'tools'>
   } = {}) {
     super()
@@ -74,13 +72,9 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
     this.tools = {}
     this.inputAudioBuffer = new Int16Array(0)
 
-    this.api = new RealtimeAPI({
-      url,
-      apiKey,
-      dangerouslyAllowAPIKeyInBrowser,
-      debug
-    })
+    this.api = new RealtimeAPI(apiParams)
     this.conversation = new RealtimeConversation()
+
     this._resetConfig()
     this._addAPIEventHandlers()
   }
@@ -227,8 +221,6 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
         }
       }
     )
-
-    return true
   }
 
   /**
@@ -342,8 +334,6 @@ export class RealtimeClient extends RealtimeEventHandler<string, Event> {
     if (this.isConnected) {
       this.api.send('session.update', { session: { ...this.sessionConfig } })
     }
-
-    return true
   }
 
   /**

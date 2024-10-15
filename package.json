@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@fisch0920/eslint-config": "^1.4.0",
+    "@total-typescript/ts-reset": "^0.6.1",
     "@types/node": "^22.4.0",
     "@types/ws": "^8.5.12",
     "dotenv": "^16.4.5",

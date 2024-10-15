@@ -4,23 +4,30 @@ import type { WebSocket as WS } from 'ws'
 
 import type { RealtimeClientEvents, RealtimeServerEvents } from './events'
 import { RealtimeEventHandler } from './event-handler'
-import { generateId, isBrowser } from './utils'
+import { generateId, getEnv, isBrowser } from './utils'
 
+/**
+ * The RealtimeAPI class handles low-level communication with the OpenAI
+ * Realtime API via WebSockets.
+ */
 export class RealtimeAPI extends RealtimeEventHandler {
+  readonly model: string
   readonly url: string
   readonly apiKey?: string
   readonly debug: boolean
   ws?: WebSocket | WS
 
   /**
-   * Create a new RealtimeAPI instance
+   * Creates a new RealtimeAPI instance.
    */
   constructor({
+    model = 'gpt-4o-realtime-preview-2024-10-01',
     url = 'wss://api.openai.com/v1/realtime',
-    apiKey,
+    apiKey = getEnv('OPENAI_API_KEY'),
     dangerouslyAllowAPIKeyInBrowser,
     debug
   }: {
+    model?: string
     url?: string
     apiKey?: string
     dangerouslyAllowAPIKeyInBrowser?: boolean
@@ -28,49 +35,31 @@ export class RealtimeAPI extends RealtimeEventHandler {
   } = {}) {
     super()
 
+    this.model = model
     this.url = url
     this.apiKey = apiKey
     this.debug = !!debug
+
     if (isBrowser && this.apiKey) {
       if (!dangerouslyAllowAPIKeyInBrowser) {
         throw new Error(
-          'Can not provide API key in the browser without "dangerouslyAllowAPIKeyInBrowser" set to true'
+          'Unable to provide API key in the browser without "dangerouslyAllowAPIKeyInBrowser" set to true'
         )
       }
     }
   }
 
   /**
-   * Tells us whether or not the WebSocket is connected
+   * Whether or not the WebSocket is connected.
    */
   get isConnected(): boolean {
     return !!this.ws
   }
 
   /**
-   * Writes WebSocket logs to console
-   */
-  log(...args: any[]) {
-    const date = new Date().toISOString()
-    const logs = [`[Websocket/${date}]`].concat(args).map((arg) => {
-      if (typeof arg === 'object' && arg !== null) {
-        return JSON.stringify(arg, null, 2)
-      } else {
-        return arg
-      }
-    })
-
-    if (this.debug) {
-      console.log(...logs)
-    }
-  }
-
-  /**
    * Connects to Realtime API Websocket Server
    */
-  async connect({
-    model = 'gpt-4o-realtime-preview-2024-10-01'
-  }: { model?: string } = {}) {
+  async connect() {
     if (this.isConnected) {
       return
     }
@@ -79,7 +68,7 @@ export class RealtimeAPI extends RealtimeEventHandler {
       console.warn(`No apiKey provided for connection to "${this.url}"`)
     }
 
-    const url = `${this.url}${model ? `?model=${model}` : ''}`
+    const url = `${this.url}${this.model ? `?model=${this.model}` : ''}`
 
     if (isBrowser) {
       if (this.apiKey) {
@@ -88,14 +77,17 @@ export class RealtimeAPI extends RealtimeEventHandler {
         )
       }
 
-      const ws = new WebSocket(url, [
-        'realtime',
-        `openai-insecure-api-key.${this.apiKey}`,
-        'openai-beta.realtime-v1'
-      ])
+      const ws = new WebSocket(
+        url,
+        [
+          'realtime',
+          this.apiKey ? `openai-insecure-api-key.${this.apiKey}` : undefined,
+          'openai-beta.realtime-v1'
+        ].filter(Boolean)
+      )
 
       ws.addEventListener('message', (event) => {
-        const message = JSON.parse(event.data)
+        const message: any = JSON.parse(event.data)
         this.receive(message.type, message)
       })
 
@@ -104,18 +96,21 @@ export class RealtimeAPI extends RealtimeEventHandler {
           this.disconnect(ws)
           reject(new Error(`Could not connect to "${this.url}"`))
         }
+
         ws.addEventListener('error', connectionErrorHandler)
         ws.addEventListener('open', () => {
-          this.log(`Connected to "${this.url}"`)
+          this._log(`Connected to "${this.url}"`)
+
           ws.removeEventListener('error', connectionErrorHandler)
           ws.addEventListener('error', () => {
             this.disconnect(ws)
-            this.log(`Error, disconnected from "${this.url}"`)
+            this._log(`Error, disconnected from "${this.url}"`)
             this.dispatch('close', { error: true })
           })
+
           ws.addEventListener('close', () => {
             this.disconnect(ws)
-            this.log(`Disconnected from "${this.url}"`)
+            this._log(`Disconnected from "${this.url}"`)
             this.dispatch('close', { error: false })
           })
 
@@ -133,11 +128,11 @@ export class RealtimeAPI extends RealtimeEventHandler {
           request.setHeader('OpenAI-Beta', 'realtime=v1')
           request.end()
         }
-        // TODO: this any is a workaround for `@types/ws` being out of date
+        // TODO: this `any` is a workaround for `@types/ws` being out-of-date.
       } as any)
 
       ws.on('message', (data) => {
-        const message = JSON.parse(data.toString())
+        const message: any = JSON.parse(data.toString())
         this.receive(message.type, message)
       })
 
@@ -149,18 +144,18 @@ export class RealtimeAPI extends RealtimeEventHandler {
 
         ws.on('error', connectionErrorHandler)
         ws.on('open', () => {
-          this.log(`Connected to "${this.url}"`)
+          this._log(`Connected to "${this.url}"`)
 
           ws.removeListener('error', connectionErrorHandler)
           ws.on('error', () => {
-            this.log(`Error, disconnected from "${this.url}"`)
+            this._log(`Error, disconnected from "${this.url}"`)
             this.disconnect(ws)
             this.dispatch('close', { error: true })
           })
 
           ws.on('close', () => {
             this.disconnect(ws)
-            this.log(`Disconnected from "${this.url}"`)
+            this._log(`Disconnected from "${this.url}"`)
             this.dispatch('close', { error: false })
           })
 
@@ -187,7 +182,7 @@ export class RealtimeAPI extends RealtimeEventHandler {
    * - "server.*"
    */
   receive(eventName: RealtimeServerEvents.ServerEventType, event: any) {
-    this.log(`received:`, eventName, event)
+    this._log('received:', eventName, event)
     this.dispatch(`server.${eventName}`, event)
     this.dispatch('server.*', event)
   }
@@ -213,7 +208,25 @@ export class RealtimeAPI extends RealtimeEventHandler {
     }
     this.dispatch(`client.${eventName}`, event)
     this.dispatch('client.*', event)
-    this.log(`sent:`, eventName, event)
+    this._log('sent:', eventName, event)
     this.ws!.send(JSON.stringify(event))
+  }
+
+  /**
+   * Writes WebSocket logs to the console if `debug` is enabled.
+   */
+  protected _log(...args: any[]) {
+    const date = new Date().toISOString()
+    const logs = [`[Websocket/${date}]`].concat(args).map((arg) => {
+      if (typeof arg === 'object' && arg !== null) {
+        return JSON.stringify(arg, null, 2)
+      } else {
+        return arg
+      }
+    })
+
+    if (this.debug) {
+      console.log(...logs)
+    }
   }
 }
