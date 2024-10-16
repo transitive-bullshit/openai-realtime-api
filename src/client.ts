@@ -169,7 +169,8 @@ export class RealtimeClient extends RealtimeEventHandler<
         const jsonArguments = JSON.parse(tool.arguments)
         const toolConfig = this.tools[tool.name]
         if (!toolConfig) {
-          throw new Error(`Tool "${tool.name}" has not been added`)
+          console.warn(`Tool "${tool.name}" not found`)
+          return
         }
 
         const result = await Promise.resolve(toolConfig.handler(jsonArguments))
