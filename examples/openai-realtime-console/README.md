@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This example has been imported from https://github.com/openai/openai-realtime-console ([at commit 6ea4dba](https://github.com/openai/openai-realtime-console/tree/6ea4dba795fee868c60ea9e8e7eba7469974b3e9). The only change has been to replace `@openai/realtime-api-beta` with `openai-realtime-api` and to fix a few types.
+> This example has been imported from https://github.com/openai/openai-realtime-console ([at commit 6ea4dba](https://github.com/openai/openai-realtime-console/tree/6ea4dba795fee868c60ea9e8e7eba7469974b3e9)). The only change has been to replace `@openai/realtime-api-beta` with `openai-realtime-api` and to fix a few types.
 
 # OpenAI Realtime Console
 
