@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This example has been imported from https://github.com/openai/openai-realtime-console. The only change has been to replace `@openai/realtime-api-beta` with `openai-realtime-api`.
+> This example has been imported from https://github.com/openai/openai-realtime-console ([at commit 6ea4dba](https://github.com/openai/openai-realtime-console/tree/6ea4dba795fee868c60ea9e8e7eba7469974b3e9). The only change has been to replace `@openai/realtime-api-beta` with `openai-realtime-api`.
 
 # OpenAI Realtime Console
 
@@ -10,7 +10,7 @@ that acts as a **Reference Client** (for browser and Node.js) and
 [`/src/lib/wavtools`](./src/lib/wavtools) which allows for simple audio
 management in the browser.
 
-<img src="/readme/realtime-console-demo.png" width="800" />
+<img src="/examples/openai-realtime-console/readme/realtime-console-demo.png" width="800" />
 
 # Starting the console
 
