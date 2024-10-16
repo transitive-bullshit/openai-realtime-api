@@ -1,6 +1,6 @@
 # openai-realtime-api <!-- omit from toc -->
 
-> TypeScript client for OpenAI's beta realtime voice API.
+> TypeScript client for OpenAI's realtime voice API.
 
 <p>
   <a href="https://github.com/transitive-bullshit/openai-realtime-api/actions/workflows/main.yml"><img alt="Build Status" src="https://github.com/transitive-bullshit/openai-realtime-api/actions/workflows/main.yml/badge.svg" /></a>
