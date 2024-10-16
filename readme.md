@@ -141,7 +141,7 @@ relay.listen(8081)
 
 Note that `RealtimeRelay` uses a different import path because it contains Node.js-specific code.
 
-A full example is included in `examples/node/relay-server.ts`.
+A full example is included in [examples/node/relay-server.ts](./examples/node/relay-server.ts).
 
 ## Examples
 
