@@ -15,11 +15,11 @@
   - [Server Usage](#server-usage)
   - [Browser Usage](#browser-usage)
   - [Relay Server](#relay-server)
-  - [Examples](#examples)
-    - [Node.js Basic](#nodejs-basic)
-    - [Node.js Audio](#nodejs-audio)
-    - [Node.js Conversation](#nodejs-conversation)
-    - [OpenaI Realtime Console](#openai-realtime-console)
+- [Examples](#examples)
+  - [Node.js Basic](#nodejs-basic)
+  - [Node.js Audio](#nodejs-audio)
+  - [Node.js Conversation](#nodejs-conversation)
+  - [OpenAI Realtime Console](#openai-realtime-console)
 - [TODO](#todo)
 - [License](#license)
 
@@ -141,7 +141,7 @@ Note that `RealtimeRelay` uses a different import path because it contains Node.
 
 A full example is included in `examples/node-relay-server.ts`.
 
-### Examples
+## Examples
 
 To run the included examples (requires `Node.js >= 18`):
 
@@ -151,21 +151,21 @@ To run the included examples (requires `Node.js >= 18`):
 
 You can set `debug: true` in the `RealtimeClient` constructor of these examples to print out the full event log.
 
-#### Node.js Basic
+### Node.js Basic
 
 Simple Node.js demo using the `RealtimeClient` which sends a text message and waits for a complete response.
 
 - [examples/node/basic.ts](./examples/node/basic.ts)
 - Run `npx tsx examples/node/basic.ts`
 
-#### Node.js Audio
+### Node.js Audio
 
 Simple Node.js demo using the `RealtimeClient` which sends a short audio message and waits for a complete response.
 
 - [examples/node/audio.ts](./examples/node/audio.ts)
 - Run `npx tsx examples/node/audio.ts`
 
-#### Node.js Conversation
+### Node.js Conversation
 
 Simple Node.js demo using the `RealtimeClient` with a microphone and speaker to simulate a full, back & forth conversation from the terminal.
 
@@ -174,7 +174,7 @@ This demo uses the [mic](https://github.com/ashishbajaj99/mic) and [speaker](htt
 - [examples/node/convo.ts](./examples/node/convo.ts)
 - `npx tsx examples/node/convo.ts`
 
-#### OpenaI Realtime Console
+### OpenAI Realtime Console
 
 This example has been imported from https://github.com/openai/openai-realtime-console ([at commit 6ea4dba](https://github.com/openai/openai-realtime-console/tree/6ea4dba795fee868c60ea9e8e7eba7469974b3e9)). The only change has been to replace `@openai/realtime-api-beta` with `openai-realtime-api` and to fix a few types.
 
