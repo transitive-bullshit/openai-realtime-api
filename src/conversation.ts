@@ -11,6 +11,7 @@ export class RealtimeConversation {
   readonly defaultFrequency = 24_000 // 24,000 Hz
 
   readonly frequency: number
+  readonly debug: boolean
 
   itemLookup: Record<string, FormattedItem> = {}
   items: FormattedItem[] = []
@@ -24,13 +25,17 @@ export class RealtimeConversation {
   queuedInputAudio?: Int16Array
 
   constructor({
-    frequency = this.defaultFrequency
+    frequency = this.defaultFrequency,
+    debug = false
   }: {
     frequency?: number
+    debug?: boolean
   } = {}) {
     assert(frequency > 0, `Invalid frequency: ${frequency}`)
 
     this.frequency = frequency
+    this.debug = debug
+
     this.clear()
   }
 
@@ -67,7 +72,19 @@ export class RealtimeConversation {
     const eventProcessor = this.EventProcessors[event.type]
     assert(eventProcessor, `Missing event processor for "${event.type}"`)
 
-    return eventProcessor.call(this, event as any, ...args)
+    try {
+      return eventProcessor.call(this, event as any, ...args)
+    } catch (err: any) {
+      if (this.debug) {
+        console.error(
+          `Error processing event "${event.type}":`,
+          err.message,
+          event
+        )
+      }
+
+      return {}
+    }
   }
 
   /**
@@ -235,7 +252,7 @@ export class RealtimeConversation {
       }
 
       const speech = this.queuedSpeechItems[item_id]
-      assert(speech)
+      assert(speech, `Speech item not found for "${item_id}"`)
       speech.audio_end_ms = audio_end_ms
 
       if (inputAudioBuffer) {

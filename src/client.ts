@@ -94,7 +94,7 @@ export class RealtimeClient extends RealtimeEventHandler<
     this.relay = !!relay
 
     this.realtime = new RealtimeAPI(apiParams)
-    this.conversation = new RealtimeConversation()
+    this.conversation = new RealtimeConversation({ debug: apiParams.debug })
 
     this._resetConfig()
     this._addAPIEventHandlers()
@@ -312,9 +312,7 @@ export class RealtimeClient extends RealtimeEventHandler<
    * Waits for a session.created event to be executed before proceeding.
    */
   async waitForSessionCreated() {
-    if (!this.isConnected) {
-      throw new Error(`Not connected, use .connect() first`)
-    }
+    assert(this.isConnected, 'Not connected, use .connect() first')
 
     while (!this.sessionCreated) {
       await sleep(1)
@@ -443,7 +441,7 @@ export class RealtimeClient extends RealtimeEventHandler<
   }
 
   /**
-   * Forces a model response generation.
+   * Forces the model to generate a response.
    */
   createResponse() {
     assert(!this.isRelay, 'Unable to create a response directly in relay mode')
@@ -474,36 +472,32 @@ export class RealtimeClient extends RealtimeEventHandler<
     if (!id) {
       this.realtime.send('response.cancel')
       return
-    } else if (id) {
-      const item = this.conversation.getItem(id)
-      if (!item) {
-        throw new Error(`Could not find item "${id}"`)
-      }
-
-      if (item.type !== 'message') {
-        throw new Error(`Can only cancelResponse messages with type "message"`)
-      } else if (item.role !== 'assistant') {
-        throw new Error(
-          `Can only cancelResponse messages with role "assistant"`
-        )
-      }
-
-      this.realtime.send('response.cancel')
-      const audioIndex = item.content.findIndex((c) => c.type === 'audio')
-      if (audioIndex === -1) {
-        throw new Error(`Could not find audio on item to cancel`)
-      }
-
-      this.realtime.send('conversation.item.truncate', {
-        item_id: id,
-        content_index: audioIndex,
-        audio_end_ms: Math.floor(
-          (sampleCount / this.conversation.defaultFrequency) * 1000
-        )
-      })
-
-      return item
     }
+
+    const item = this.conversation.getItem(id)
+    assert(item, `Could not find item "${id}"`)
+    assert(
+      item.type === 'message',
+      `Can only cancelResponse messages with type "message"`
+    )
+    assert(
+      item.role === 'assistant',
+      `Can only cancelResponse messages with role "assistant"`
+    )
+
+    this.realtime.send('response.cancel')
+    const audioIndex = item.content.findIndex((c) => c.type === 'audio')
+    assert(audioIndex >= 0, `Could not find audio on item ${id} to cancel`)
+
+    this.realtime.send('conversation.item.truncate', {
+      item_id: id,
+      content_index: audioIndex,
+      audio_end_ms: Math.floor(
+        (sampleCount / this.conversation.defaultFrequency) * 1000
+      )
+    })
+
+    return item
   }
 
   /**
