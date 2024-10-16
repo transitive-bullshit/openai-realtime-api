@@ -388,7 +388,7 @@ export class RealtimeClient extends RealtimeEventHandler<
       tools
     }
 
-    if (this.isConnected) {
+    if (this.isConnected && !this.isRelay) {
       this.realtime.send('session.update', {
         session: structuredClone(this.sessionConfig)
       })
@@ -403,6 +403,8 @@ export class RealtimeClient extends RealtimeEventHandler<
       Realtime.InputTextContentPart | Realtime.InputAudioContentPart
     >
   ) {
+    assert(!this.isRelay, 'Unable to send messages directly in relay mode')
+
     if (content.length) {
       this.realtime.send('conversation.item.create', {
         item: {
@@ -420,6 +422,8 @@ export class RealtimeClient extends RealtimeEventHandler<
    * Appends user audio to the existing audio buffer.
    */
   appendInputAudio(arrayBuffer: Int16Array | ArrayBuffer) {
+    assert(!this.isRelay, 'Unable to append input audio directly in relay mode')
+
     if (arrayBuffer.byteLength > 0) {
       this.realtime.send('input_audio_buffer.append', {
         audio: arrayBufferToBase64(arrayBuffer)
@@ -436,6 +440,8 @@ export class RealtimeClient extends RealtimeEventHandler<
    * Forces a model response generation.
    */
   createResponse() {
+    assert(!this.isRelay, 'Unable to create a response directly in relay mode')
+
     if (!this.getTurnDetectionType() && this.inputAudioBuffer.byteLength > 0) {
       this.realtime.send('input_audio_buffer.commit')
       this.conversation.queueInputAudio(this.inputAudioBuffer)
@@ -457,6 +463,8 @@ export class RealtimeClient extends RealtimeEventHandler<
     /** The number of samples to truncate past for the ongoing generation. */
     sampleCount = 0
   ): Realtime.AssistantItem | undefined {
+    assert(!this.isRelay, 'Unable to cancel a response directly in relay mode')
+
     if (!id) {
       this.realtime.send('response.cancel')
       return

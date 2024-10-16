@@ -25,7 +25,7 @@
 - [All events](./src/events.ts) and handlers are 100% typed
 - 100% drop-in replacement for OpenAI's JS version (same events and classes)
 - Fixes dozens of small bugs and inconsistencies
-  - [#3](https://github.com/openai/openai-realtime-api-beta/issues/3), [#14](https://github.com/openai/openai-realtime-api-beta/issues/14), [#11](https://github.com/openai/openai-realtime-api-beta/pull/11), [#17](https://github.com/openai/openai-realtime-api-beta/pull/17), [#29](https://github.com/openai/openai-realtime-api-beta/pull/29), [#34](https://github.com/openai/openai-realtime-api-beta/pull/34), [#35](https://github.com/openai/openai-realtime-api-beta/pull/35), [#37](https://github.com/openai/openai-realtime-api-beta/pull/37), [#43](https://github.com/openai/openai-realtime-api-beta/pull/43), [#44](https://github.com/openai/openai-realtime-api-beta/pull/44), and likely others.
+  - ([#3](https://github.com/openai/openai-realtime-api-beta/issues/3), [#14](https://github.com/openai/openai-realtime-api-beta/issues/14), [#11](https://github.com/openai/openai-realtime-api-beta/pull/11), [#17](https://github.com/openai/openai-realtime-api-beta/pull/17), [#29](https://github.com/openai/openai-realtime-api-beta/pull/29), [#34](https://github.com/openai/openai-realtime-api-beta/pull/34), [#35](https://github.com/openai/openai-realtime-api-beta/pull/35), [#37](https://github.com/openai/openai-realtime-api-beta/pull/37), [#43](https://github.com/openai/openai-realtime-api-beta/pull/43), [#44](https://github.com/openai/openai-realtime-api-beta/pull/44), and likely others)
 - Published to NPM
 - Includes CLI examples for easy local testing
 - Includes a simple relay server (via a separate export)
@@ -36,7 +36,7 @@
 npm install openai-realtime-api
 ```
 
-This package is [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). It requires `Node.js >= 18` or a browser-like environment (any modern browser, Deno, Bun, CF workers, etc).
+This package is [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). It requires `Node.js >= 18`, a browser environment, or a modern JS/TS runtime (Deno, Bun, CF workers, etc).
 
 ## Usage
 
@@ -90,7 +90,30 @@ See [examples](#examples) for more complete demos.
 
 ### Browser Usage
 
-`RealtimeClient` takes in an optional `url` which can be pointed at a relay server. You can use `apiKey` with `RealtimeClient` in the browser, but you also have to pass `dangerouslyAllowAPIKeyInBrowser: true`.
+`RealtimeClient` takes in an optional `url` which can be pointed at a relay server.
+
+```ts
+import { RealtimeClient } from 'openai-realtime-api'
+
+// Create a browser client which points to a relay server.
+const client = new RealtimeClient({ url: RELAY_SERVER_URL })
+```
+
+Alternatively, you can use `apiKey` with `RealtimeClient` in the browser, but you also have to pass `dangerouslyAllowAPIKeyInBrowser: true`.
+
+```ts
+import { RealtimeClient } from 'openai-realtime-api'
+
+// Create a browser client which connects directly to the OpenAI realtime API
+// with an unsafe, client-side API key.
+const client = new RealtimeClient({
+  apiKey: process.env.OPENAI_API_KEY,
+  dangerouslyAllowAPIKeyInBrowser: true
+})
+```
+
+> [!CAUTION]
+> We strongly recommend against including your API key in any client (mobile or browser). It can be useful for local testing, but for production, you should be using a relay server.
 
 ### Relay Server
 
@@ -98,8 +121,8 @@ See [examples](#examples) for more complete demos.
 import { RealtimeClient } from 'openai-realtime-api'
 import { RealtimeRelay } from 'openai-realtime-api/node'
 
-// Setting `relay: true` disables tool calls, since that will be the
-// responsibility of the upstream client.
+// Setting `relay: true` disables tool calls and directly modifying the session,
+// since that will be the responsibility of the upstream client.
 const client = new RealtimeClient({ relay: true })
 const relay = new RealtimeRelay({ client })
 
