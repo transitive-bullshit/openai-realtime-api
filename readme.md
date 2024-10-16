@@ -47,7 +47,7 @@ This package is [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908
 ## Usage
 
 > [!IMPORTANT]
-> All usage and events are 100% compatible with the [OpenAI JS version](https://github.com/openai/openai-realtime-api-beta). The main difference aside from bug fixes is that **all events are fully-typed**. Check out [OpenAI's readme](https://github.com/openai/openai-realtime-api-beta) for more detailed docs.
+> All usage and events are 100% compatible with the [OpenAI JS version](https://github.com/openai/openai-realtime-api-beta). The main difference aside from bug fixes is that **all events are fully-typed**.
 
 ```ts
 import { RealtimeClient } from 'openai-realtime-api'
@@ -91,6 +91,8 @@ const event = await client.realtime.waitForNext('response.done')
 See [examples](#examples) for more complete demos.
 
 See also the official [OpenAI Realtime API Guide](https://platform.openai.com/docs/guides/realtime) and [API Reference](https://platform.openai.com/docs/api-reference/realtime).
+
+For more info on usage, tools, and custom events, see [OpenAI's readme](https://github.com/openai/openai-realtime-api-beta). Note that this package is 100% compatible with OpenAI's beta package in terms of both official and unofficial events. The only difference is that all events are typed.
 
 ### Server Usage
 
