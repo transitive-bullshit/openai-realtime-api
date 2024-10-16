@@ -1,7 +1,7 @@
 import 'dotenv/config'
 
-import { RealtimeClient } from '../src'
-import { RealtimeRelay } from '../src/node'
+import { RealtimeClient } from 'openai-realtime-api'
+import { RealtimeRelay } from 'openai-realtime-api/node'
 
 /**
  * Simple Node.js demo showing how to run the relay server.

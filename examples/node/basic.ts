@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { RealtimeClient } from '../src'
+import { RealtimeClient } from 'openai-realtime-api'
 
 /**
  * Simple Node.js demo using the `RealtimeClient` which sends a text message and

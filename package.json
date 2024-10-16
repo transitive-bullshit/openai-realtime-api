@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "dev": "tsup --watch",
     "pretest": "run-s build",
     "test": "run-s test:*",
     "test:format": "prettier --check \"**/*.{js,ts,tsx}\"",
@@ -52,11 +53,9 @@
     "audio-decode": "^2.2.2",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
-    "mic": "^2.1.2",
     "npm-run-all2": "^6.2.2",
     "only-allow": "^1.2.1",
     "prettier": "^3.3.3",
-    "speaker": "^0.5.5",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4",
     "vitest": "2.1.3"

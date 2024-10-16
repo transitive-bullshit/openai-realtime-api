@@ -340,7 +340,7 @@ export class RealtimeClient extends RealtimeEventHandler<
   /**
    * Adds a tool to the session.
    */
-  addTool(definition: Realtime.ToolDefinition, handler: ToolHandler) {
+  addTool(definition: Realtime.PartialToolDefinition, handler: ToolHandler) {
     assert(!this.isRelay, 'Unable to add tools in relay mode')
     assert(definition?.name, 'Missing tool name in definition')
     const { name } = definition
@@ -350,7 +350,13 @@ export class RealtimeClient extends RealtimeEventHandler<
       `Tool "${name}" handler must be a function`
     )
 
-    this.tools[name] = { definition, handler }
+    this.tools[name] = {
+      definition: {
+        type: 'function',
+        ...definition
+      },
+      handler
+    }
     this.updateSession()
   }
 

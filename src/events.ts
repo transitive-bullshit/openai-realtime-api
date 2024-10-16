@@ -5,6 +5,22 @@ export interface Event {
   type: string
 }
 
+export type RealtimeEvent = RealtimeCustomEvents.CustomEvent & {
+  type: 'realtime.event'
+  source: 'server' | 'client'
+  time: string
+  event: Event
+} & (
+    | {
+        source: 'server'
+        event: RealtimeServerEvents.EventMap[RealtimeServerEvents.EventType]
+      }
+    | {
+        source: 'client'
+        event: RealtimeClientEvents.EventMap[RealtimeClientEvents.EventType]
+      }
+  )
+
 // See https://platform.openai.com/docs/guides/realtime/events
 export namespace RealtimeClientEvents {
   /** Event types sent by the client. */
@@ -681,7 +697,7 @@ export namespace RealtimeCustomEvents {
   }
 
   export type CustomServerEvent<T extends RealtimeServerEvents.EventType> =
-    Event & {
+    RealtimeEvent & {
       type: 'realtime.event'
       source: 'server'
       time: string
@@ -689,7 +705,7 @@ export namespace RealtimeCustomEvents {
     }
 
   export type CustomClientEvent<T extends RealtimeClientEvents.EventType> =
-    Event & {
+    RealtimeEvent & {
       type: 'realtime.event'
       source: 'client'
       time: string

@@ -60,6 +60,10 @@ export namespace Realtime {
     parameters: { [key: string]: any }
   }
 
+  export type PartialToolDefinition = Omit<ToolDefinition, 'type'> & {
+    type?: 'function'
+  }
+
   export interface SessionConfig {
     /** The default system instructions prepended to model calls. */
     instructions?: string

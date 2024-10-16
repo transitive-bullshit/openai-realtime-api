@@ -3,8 +3,7 @@ import 'dotenv/config'
 import fs from 'node:fs/promises'
 
 import decodeAudio from 'audio-decode'
-
-import { arrayBufferToBase64, RealtimeClient } from '../src'
+import { arrayBufferToBase64, RealtimeClient } from 'openai-realtime-api'
 
 /**
  * Simple Node.js demo using the `RealtimeClient` which sends a short audio

@@ -3,9 +3,8 @@ import 'dotenv/config'
 import { Readable } from 'node:stream'
 
 import microphone from 'mic'
+import { RealtimeClient } from 'openai-realtime-api'
 import Speaker from 'speaker'
-
-import { RealtimeClient } from '../src'
 
 /**
  * Simple Node.js demo using the `RealtimeClient` with a microphone and speaker

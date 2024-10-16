@@ -73,14 +73,14 @@ export class RealtimeConversation {
   /**
    * Retrieves an item by ID.
    */
-  getItem(id: string): Realtime.Item | undefined {
+  getItem(id: string): FormattedItem | undefined {
     return this.itemLookup[id]
   }
 
   /**
    * Retrieves all items in the conversation.
    */
-  getItems(): Realtime.Item[] {
+  getItems(): FormattedItem[] {
     return this.items.slice()
   }
 
