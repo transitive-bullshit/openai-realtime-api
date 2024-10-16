@@ -1,6 +1,6 @@
 {
   "name": "openai-realtime-api",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "TypeScript client OpenAI's realtime voice API.",
   "author": "Travis Fischer <travis@transitivebullsh.it>",
   "license": "MIT",
