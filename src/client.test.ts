@@ -3,7 +3,7 @@ import 'dotenv/config'
 import fs from 'node:fs/promises'
 
 import decodeAudio from 'audio-decode'
-import { expect, test } from 'vitest'
+import { expect, expectTypeOf, test } from 'vitest'
 
 import type { Event, RealtimeServerEvents } from './events'
 import { RealtimeClient } from './client'
@@ -59,8 +59,8 @@ test(
     expect(item.content[0]!.type).toBe('input_audio')
 
     // Wait for the full response to complete from the server
-    const event: RealtimeServerEvents.ResponseDoneEvent =
-      await client.api.waitForNext('response.done')
+    const event = await client.realtime.waitForNext('response.done')
+    expectTypeOf(event).toEqualTypeOf<RealtimeServerEvents.ResponseDoneEvent>()
     console.log(event)
 
     client.disconnect()

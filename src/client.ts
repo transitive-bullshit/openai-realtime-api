@@ -32,7 +32,9 @@ export class RealtimeClient extends RealtimeEventHandler<
   readonly defaultSessionConfig: Realtime.SessionConfig
   sessionConfig: Realtime.SessionConfig
 
-  api: RealtimeAPI
+  readonly relay: boolean
+
+  realtime: RealtimeAPI
   conversation: RealtimeConversation
 
   inputAudioBuffer: Int16Array
@@ -47,6 +49,7 @@ export class RealtimeClient extends RealtimeEventHandler<
 
   constructor({
     sessionConfig,
+    relay = false,
     ...apiParams
   }: {
     sessionConfig?: Partial<Omit<Realtime.SessionConfig, 'tools'>>
@@ -55,6 +58,11 @@ export class RealtimeClient extends RealtimeEventHandler<
     url?: string
     dangerouslyAllowAPIKeyInBrowser?: boolean
     debug?: boolean
+    /**
+     * Relay mode disables tool use, since it will be the responsibility of the
+     * upstream client to handle tool calls.
+     */
+    relay?: boolean
   } = {}) {
     super()
 
@@ -83,8 +91,9 @@ export class RealtimeClient extends RealtimeEventHandler<
     this.sessionCreated = false
     this.tools = {}
     this.inputAudioBuffer = new Int16Array(0)
+    this.relay = !!relay
 
-    this.api = new RealtimeAPI(apiParams)
+    this.realtime = new RealtimeAPI(apiParams)
     this.conversation = new RealtimeConversation()
 
     this._resetConfig()
@@ -106,7 +115,7 @@ export class RealtimeClient extends RealtimeEventHandler<
    */
   protected _addAPIEventHandlers() {
     // Event Logging handlers
-    this.api.on('client.*', (event: any) => {
+    this.realtime.on('client.*', (event: any) => {
       this.dispatch('realtime.event', {
         type: 'realtime.event',
         time: new Date().toISOString(),
@@ -115,7 +124,7 @@ export class RealtimeClient extends RealtimeEventHandler<
       })
     })
 
-    this.api.on('server.*', (event: RealtimeServerEvents.ServerEvent) => {
+    this.realtime.on('server.*', (event: RealtimeServerEvents.ServerEvent) => {
       this.dispatch('realtime.event', {
         type: 'realtime.event',
         time: new Date().toISOString(),
@@ -125,12 +134,13 @@ export class RealtimeClient extends RealtimeEventHandler<
     })
 
     // Handles session created event
-    this.api.on('server.session.created', () => {
+    this.realtime.on('server.session.created', () => {
       this.sessionCreated = true
     })
 
     // Setup for application control flow
     const handler = (event: any, ...args: any[]): EventHandlerResult => {
+      if (!this.isConnected) return {}
       return this.conversation.processEvent(event, ...args)
     }
 
@@ -151,6 +161,10 @@ export class RealtimeClient extends RealtimeEventHandler<
     }
 
     const callTool = async (tool: FormattedTool) => {
+      // In relay mode, we don't attempt to call tools. That is the
+      // responsibility of the upstream client.
+      if (this.isRelay) return
+
       try {
         const jsonArguments = JSON.parse(tool.arguments)
         const toolConfig = this.tools[tool.name]
@@ -159,7 +173,7 @@ export class RealtimeClient extends RealtimeEventHandler<
         }
 
         const result = await Promise.resolve(toolConfig.handler(jsonArguments))
-        this.api.send('conversation.item.create', {
+        this.realtime.send('conversation.item.create', {
           item: {
             type: 'function_call_output',
             call_id: tool.call_id,
@@ -167,7 +181,7 @@ export class RealtimeClient extends RealtimeEventHandler<
           }
         })
       } catch (err: any) {
-        this.api.send('conversation.item.create', {
+        this.realtime.send('conversation.item.create', {
           item: {
             type: 'function_call_output',
             call_id: tool.call_id,
@@ -180,17 +194,17 @@ export class RealtimeClient extends RealtimeEventHandler<
     }
 
     // Handlers to update internal conversation state
-    this.api.on('server.response.created', handler)
-    this.api.on('server.response.output_item.added', handler)
-    this.api.on('server.response.content_part.added', handler)
-    this.api.on(
+    this.realtime.on('server.response.created', handler)
+    this.realtime.on('server.response.output_item.added', handler)
+    this.realtime.on('server.response.content_part.added', handler)
+    this.realtime.on(
       'server.input_audio_buffer.speech_started',
       (event: RealtimeServerEvents.InputAudioBufferSpeechStartedEvent) => {
         handler(event)
         this.dispatch('conversation.interrupted', event)
       }
     )
-    this.api.on(
+    this.realtime.on(
       'server.input_audio_buffer.speech_stopped',
       (event: RealtimeServerEvents.InputAudioBufferSpeechStoppedEvent) => {
         handler(event, this.inputAudioBuffer)
@@ -198,11 +212,11 @@ export class RealtimeClient extends RealtimeEventHandler<
     )
 
     // Handlers to update application state
-    this.api.on(
+    this.realtime.on(
       'server.conversation.item.created',
       (event: RealtimeServerEvents.ConversationItemCreatedEvent) => {
         const res = handlerWithDispatch(event)
-        assert(res.item)
+        if (!res.item) return
 
         this.dispatch('conversation.item.appended', {
           type: 'conversation.item.appended',
@@ -217,25 +231,27 @@ export class RealtimeClient extends RealtimeEventHandler<
         }
       }
     )
-    this.api.on('server.conversation.item.truncated', handlerWithDispatch)
-    this.api.on('server.conversation.item.deleted', handlerWithDispatch)
-    this.api.on(
+    this.realtime.on('server.conversation.item.truncated', handlerWithDispatch)
+    this.realtime.on('server.conversation.item.deleted', handlerWithDispatch)
+    this.realtime.on(
       'server.conversation.item.input_audio_transcription.completed',
       handlerWithDispatch
     )
-    this.api.on('server.response.audio_transcript.delta', handlerWithDispatch)
-    this.api.on('server.response.audio.delta', handlerWithDispatch)
-    this.api.on('server.response.text.delta', handlerWithDispatch)
-    this.api.on(
+    this.realtime.on(
+      'server.response.audio_transcript.delta',
+      handlerWithDispatch
+    )
+    this.realtime.on('server.response.audio.delta', handlerWithDispatch)
+    this.realtime.on('server.response.text.delta', handlerWithDispatch)
+    this.realtime.on(
       'server.response.function_call_arguments.delta',
       handlerWithDispatch
     )
-    this.api.on(
+    this.realtime.on(
       'server.response.output_item.done',
       async (event: RealtimeServerEvents.ResponseOutputItemDoneEvent) => {
         const res = handlerWithDispatch(event)
-        assert(res.item)
-        assert(res.item.formatted)
+        if (!res.item?.formatted) return
 
         if (res.item.status === 'completed') {
           this.dispatch('conversation.item.completed', {
@@ -255,7 +271,15 @@ export class RealtimeClient extends RealtimeEventHandler<
    * Whether the realtime socket is connected.
    */
   get isConnected(): boolean {
-    return this.api.isConnected
+    return this.realtime.isConnected
+  }
+
+  /**
+   * Whether the client is in relay mode. When in relay mode, the client will
+   * not attempt to invoke tools.
+   */
+  get isRelay(): boolean {
+    return this.relay
   }
 
   /**
@@ -264,7 +288,7 @@ export class RealtimeClient extends RealtimeEventHandler<
   reset() {
     this.disconnect()
     this.clearEventHandlers()
-    this.api.clearEventHandlers()
+    this.realtime.clearEventHandlers()
     this._resetConfig()
     this._addAPIEventHandlers()
   }
@@ -277,7 +301,7 @@ export class RealtimeClient extends RealtimeEventHandler<
       return
     }
 
-    await this.api.connect()
+    await this.realtime.connect()
     this.updateSession()
   }
 
@@ -299,7 +323,7 @@ export class RealtimeClient extends RealtimeEventHandler<
    */
   disconnect() {
     this.sessionCreated = false
-    this.api.disconnect()
+    this.realtime.disconnect()
     this.conversation.clear()
   }
 
@@ -314,7 +338,8 @@ export class RealtimeClient extends RealtimeEventHandler<
    * Adds a tool to the session.
    */
   addTool(definition: Realtime.ToolDefinition, handler: ToolHandler) {
-    assert(definition?.name, `Missing tool name in definition`)
+    assert(!this.isRelay, 'Unable to add tools in relay mode')
+    assert(definition?.name, 'Missing tool name in definition')
     const { name } = definition
 
     assert(
@@ -330,6 +355,7 @@ export class RealtimeClient extends RealtimeEventHandler<
    * Removes a tool from the session.
    */
   removeTool(name: string) {
+    assert(!this.isRelay, 'Unable to add tools in relay mode')
     assert(
       this.tools[name],
       `Tool "${name}" does not exist, can not be removed.`
@@ -342,7 +368,7 @@ export class RealtimeClient extends RealtimeEventHandler<
    * Deletes an item.
    */
   deleteItem(id: string) {
-    this.api.send('conversation.item.delete', { item_id: id })
+    this.realtime.send('conversation.item.delete', { item_id: id })
   }
 
   /**
@@ -360,7 +386,9 @@ export class RealtimeClient extends RealtimeEventHandler<
     }
 
     if (this.isConnected) {
-      this.api.send('session.update', { session: { ...this.sessionConfig } })
+      this.realtime.send('session.update', {
+        session: structuredClone(this.sessionConfig)
+      })
     }
   }
 
@@ -373,7 +401,7 @@ export class RealtimeClient extends RealtimeEventHandler<
     >
   ) {
     if (content.length) {
-      this.api.send('conversation.item.create', {
+      this.realtime.send('conversation.item.create', {
         item: {
           type: 'message',
           role: 'user',
@@ -390,7 +418,7 @@ export class RealtimeClient extends RealtimeEventHandler<
    */
   appendInputAudio(arrayBuffer: Int16Array | ArrayBuffer) {
     if (arrayBuffer.byteLength > 0) {
-      this.api.send('input_audio_buffer.append', {
+      this.realtime.send('input_audio_buffer.append', {
         audio: arrayBufferToBase64(arrayBuffer)
       })
 
@@ -406,12 +434,12 @@ export class RealtimeClient extends RealtimeEventHandler<
    */
   createResponse() {
     if (!this.getTurnDetectionType() && this.inputAudioBuffer.byteLength > 0) {
-      this.api.send('input_audio_buffer.commit')
+      this.realtime.send('input_audio_buffer.commit')
       this.conversation.queueInputAudio(this.inputAudioBuffer)
       this.inputAudioBuffer = new Int16Array(0)
     }
 
-    this.api.send('response.create')
+    this.realtime.send('response.create')
   }
 
   /**
@@ -427,7 +455,7 @@ export class RealtimeClient extends RealtimeEventHandler<
     sampleCount = 0
   ): Realtime.AssistantItem | undefined {
     if (!id) {
-      this.api.send('response.cancel')
+      this.realtime.send('response.cancel')
       return
     } else if (id) {
       const item = this.conversation.getItem(id)
@@ -443,13 +471,13 @@ export class RealtimeClient extends RealtimeEventHandler<
         )
       }
 
-      this.api.send('response.cancel')
+      this.realtime.send('response.cancel')
       const audioIndex = item.content.findIndex((c) => c.type === 'audio')
       if (audioIndex === -1) {
         throw new Error(`Could not find audio on item to cancel`)
       }
 
-      this.api.send('conversation.item.truncate', {
+      this.realtime.send('conversation.item.truncate', {
         item_id: id,
         content_index: audioIndex,
         audio_end_ms: Math.floor(

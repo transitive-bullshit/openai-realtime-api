@@ -21,6 +21,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "default": "./dist/node/index.js"
     }
   },
   "files": [
@@ -33,6 +37,7 @@
     "test:format": "prettier --check \"**/*.{js,ts,tsx}\"",
     "test:lint": "eslint .",
     "test:typecheck": "tsc --noEmit",
+    "test-unit": "vitest run",
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {

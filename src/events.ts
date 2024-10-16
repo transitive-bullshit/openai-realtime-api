@@ -31,6 +31,7 @@ export namespace RealtimeClientEvents {
     'response.cancel': ResponseCancelEvent
   }
 
+  // Same as EventMap but every key is prefixed by 'client.'
   export type PrefixedEventMap = {
     [K in keyof EventMap as `client.${Extract<K, string>}`]: EventMap[K]
   }
@@ -184,6 +185,7 @@ export namespace RealtimeServerEvents {
     'rate_limits.updated': RateLimitsUpdatedEvent
   }
 
+  // Same as EventMap but every key is prefixed by 'server.'
   export type PrefixedEventMap = {
     [K in keyof EventMap as `server.${Extract<K, string>}`]: EventMap[K]
   }

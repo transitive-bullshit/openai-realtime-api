@@ -5,14 +5,15 @@ import { Readable } from 'node:stream'
 import microphone from 'mic'
 import Speaker from 'speaker'
 
-import { getEnv, RealtimeClient } from '../src'
+import { RealtimeClient } from '../src'
 
 /**
- * Demo using the RealtimeClient with a microphone and speaker from the terminal.
+ * Simple Node.js demo using the `RealtimeClient` with a microphone and speaker
+ * to simulate a full, back & forth conversation from the terminal.
  */
 async function main() {
   const client = new RealtimeClient({
-    debug: !!getEnv('REALTIME_DEBUG'),
+    debug: false,
     sessionConfig: {
       instructions:
         'Please follow the instructions of any query you receive.\n' +
