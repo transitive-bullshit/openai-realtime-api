@@ -23,7 +23,7 @@
 
 - **Strongly typed** TS fork of [openai/openai-realtime-api-beta](https://github.com/openai/openai-realtime-api-beta)
 - [All events](./src/events.ts) and handlers are 100% typed
-- 100% drop-in replacement for OpenAI's JS version (same events and classes)
+- Drop-in replacement for OpenAI's JS version
 - Fixes dozens of small bugs and inconsistencies
   - ([#3](https://github.com/openai/openai-realtime-api-beta/issues/3), [#14](https://github.com/openai/openai-realtime-api-beta/issues/14), [#11](https://github.com/openai/openai-realtime-api-beta/pull/11), [#17](https://github.com/openai/openai-realtime-api-beta/pull/17), [#29](https://github.com/openai/openai-realtime-api-beta/pull/29), [#34](https://github.com/openai/openai-realtime-api-beta/pull/34), [#35](https://github.com/openai/openai-realtime-api-beta/pull/35), [#37](https://github.com/openai/openai-realtime-api-beta/pull/37), [#43](https://github.com/openai/openai-realtime-api-beta/pull/43), [#44](https://github.com/openai/openai-realtime-api-beta/pull/44), and likely others)
 - Published to NPM
@@ -83,6 +83,8 @@ const event = await client.realtime.waitForNext('response.done')
 ```
 
 See [examples](#examples) for more complete demos.
+
+See also the official [OpenAI Realtime API Guide](https://platform.openai.com/docs/guides/realtime) and [API Reference](https://platform.openai.com/docs/api-reference/realtime).
 
 ### Server Usage
 
