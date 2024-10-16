@@ -32,7 +32,7 @@
   - ([#3](https://github.com/openai/openai-realtime-api-beta/issues/3), [#14](https://github.com/openai/openai-realtime-api-beta/issues/14), [#11](https://github.com/openai/openai-realtime-api-beta/pull/11), [#17](https://github.com/openai/openai-realtime-api-beta/pull/17), [#29](https://github.com/openai/openai-realtime-api-beta/pull/29), [#34](https://github.com/openai/openai-realtime-api-beta/pull/34), [#35](https://github.com/openai/openai-realtime-api-beta/pull/35), [#37](https://github.com/openai/openai-realtime-api-beta/pull/37), [#43](https://github.com/openai/openai-realtime-api-beta/pull/43), [#44](https://github.com/openai/openai-realtime-api-beta/pull/44), and likely others)
 - Published to NPM
 - Supports Node.js, browser, deno, bun, CF workers, etc
-- **Includes Node.js CLI examples for easy local testing**
+- Includes Node.js CLI examples for easy local testing
 - Includes a simple relay server (via a separate export)
 - Includes the [OpenAI Realtime Console demo](#openai-realtime-console) using this package
 
