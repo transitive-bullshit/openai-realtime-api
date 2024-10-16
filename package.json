@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/transitive-bullshit/openai-realtime-api.git"
   },
-  "packageManager": "pnpm@9.12.1",
+  "packageManager": "pnpm@9.12.2",
   "engines": {
     "node": ">=18"
   },

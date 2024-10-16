@@ -8,15 +8,13 @@
     "type": "git",
     "url": "git+https://github.com/transitive-bullshit/openai-realtime-api.git"
   },
-  "packageManager": "pnpm@9.12.1",
-  "engines": {
-    "node": ">=18"
-  },
   "type": "module",
   "dependencies": {
     "openai-realtime-api": "workspace:*",
     "audio-decode": "^2.2.2",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.5"
+  },
+  "optionalDependencies": {
     "mic": "^2.1.2",
     "speaker": "^0.5.5"
   }
