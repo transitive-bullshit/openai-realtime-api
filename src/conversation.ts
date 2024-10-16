@@ -67,7 +67,7 @@ export class RealtimeConversation {
     const eventProcessor = this.EventProcessors[event.type]
     assert(eventProcessor, `Missing event processor for "${event.type}"`)
 
-    return eventProcessor.call(this, event, ...args)
+    return eventProcessor.call(this, event as any, ...args)
   }
 
   /**
@@ -85,15 +85,13 @@ export class RealtimeConversation {
   }
 
   /** Event handlers. */
-  EventProcessors: Partial<
-    Record<
-      RealtimeServerEvents.EventType,
-      (...args: any[]) => EventHandlerResult
-    >
-  > = {
-    'conversation.item.created': (
-      event: RealtimeServerEvents.ConversationItemCreatedEvent
-    ) => {
+  EventProcessors: Partial<{
+    [K in keyof RealtimeServerEvents.EventMap]: (
+      event: RealtimeServerEvents.EventMap[K],
+      ...args: any[]
+    ) => EventHandlerResult
+  }> = {
+    'conversation.item.created': (event) => {
       const { item } = event
       const newItem: FormattedItem = {
         ...structuredClone(item),
@@ -160,9 +158,7 @@ export class RealtimeConversation {
       return { item: newItem }
     },
 
-    'conversation.item.truncated': (
-      event: RealtimeServerEvents.ConversationItemTruncatedEvent
-    ) => {
+    'conversation.item.truncated': (event) => {
       const { item_id, audio_end_ms } = event
       const item = this.itemLookup[item_id]
       if (!item) {
@@ -176,9 +172,7 @@ export class RealtimeConversation {
       return { item }
     },
 
-    'conversation.item.deleted': (
-      event: RealtimeServerEvents.ConversationItemDeletedEvent
-    ) => {
+    'conversation.item.deleted': (event) => {
       const { item_id } = event
       const item = this.itemLookup[item_id]
       if (!item) {
@@ -195,9 +189,7 @@ export class RealtimeConversation {
       return { item }
     },
 
-    'conversation.item.input_audio_transcription.completed': (
-      event: RealtimeServerEvents.ConversationItemInputAudioTranscriptionCompletedEvent
-    ) => {
+    'conversation.item.input_audio_transcription.completed': (event) => {
       const { item_id, content_index, transcript } = event
       const item = this.itemLookup[item_id]
 
@@ -224,9 +216,7 @@ export class RealtimeConversation {
       }
     },
 
-    'input_audio_buffer.speech_started': (
-      event: RealtimeServerEvents.InputAudioBufferSpeechStartedEvent
-    ) => {
+    'input_audio_buffer.speech_started': (event) => {
       const { item_id, audio_start_ms } = event
       const item = this.itemLookup[item_id]
       this.queuedSpeechItems[item_id] = { audio_start_ms }
@@ -234,7 +224,7 @@ export class RealtimeConversation {
     },
 
     'input_audio_buffer.speech_stopped': (
-      event: RealtimeServerEvents.InputAudioBufferSpeechStoppedEvent,
+      event,
       inputAudioBuffer: Int16Array
     ) => {
       const { item_id, audio_end_ms } = event
@@ -262,7 +252,7 @@ export class RealtimeConversation {
       return { item }
     },
 
-    'response.created': (event: RealtimeServerEvents.ResponseCreatedEvent) => {
+    'response.created': (event) => {
       const { response } = event
 
       if (!this.responseLookup[response.id]) {
@@ -273,9 +263,7 @@ export class RealtimeConversation {
       return { response }
     },
 
-    'response.output_item.added': (
-      event: RealtimeServerEvents.ResponseOutputItemAddedEvent
-    ) => {
+    'response.output_item.added': (event) => {
       const { response_id, item } = event
       const response = this.responseLookup[response_id]
 
@@ -289,9 +277,7 @@ export class RealtimeConversation {
       return { item, response }
     },
 
-    'response.output_item.done': (
-      event: RealtimeServerEvents.ResponseOutputItemDoneEvent
-    ) => {
+    'response.output_item.done': (event) => {
       const { item } = event
       if (!item) {
         throw new Error(`response.output_item.done: Missing "item"`)
@@ -308,9 +294,7 @@ export class RealtimeConversation {
       return { item: foundItem }
     },
 
-    'response.content_part.added': (
-      event: RealtimeServerEvents.ResponseContentPartItemAddedEvent
-    ) => {
+    'response.content_part.added': (event) => {
       const { item_id, part } = event
       const item = this.itemLookup[item_id]
       if (!item) {
@@ -323,9 +307,7 @@ export class RealtimeConversation {
       return { item }
     },
 
-    'response.audio_transcript.delta': (
-      event: RealtimeServerEvents.ResponseAudioTranscriptDeltaEvent
-    ) => {
+    'response.audio_transcript.delta': (event) => {
       const { item_id, content_index, delta } = event
       const item = this.itemLookup[item_id]
       if (!item) {
@@ -341,9 +323,7 @@ export class RealtimeConversation {
       return { item, delta: { transcript: delta } }
     },
 
-    'response.audio.delta': (
-      event: RealtimeServerEvents.ResponseAudioDeltaEvent
-    ) => {
+    'response.audio.delta': (event) => {
       const { item_id, content_index: _, delta } = event
       const item = this.itemLookup[item_id]
       if (!item) {
@@ -363,9 +343,7 @@ export class RealtimeConversation {
       return { item, delta: { audio: appendValues } }
     },
 
-    'response.text.delta': (
-      event: RealtimeServerEvents.ResponseTextDeltaEvent
-    ) => {
+    'response.text.delta': (event) => {
       const { item_id, content_index, delta } = event
       const item = this.itemLookup[item_id]
       if (!item) {
@@ -378,9 +356,7 @@ export class RealtimeConversation {
       return { item, delta: { text: delta } }
     },
 
-    'response.function_call_arguments.delta': (
-      event: RealtimeServerEvents.ResponseFunctionCallArgumentsDeltaEvent
-    ) => {
+    'response.function_call_arguments.delta': (event) => {
       const { item_id, delta } = event
       const item = this.itemLookup[item_id]
       if (!item) {
