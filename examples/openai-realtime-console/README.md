@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This example has been imported from https://github.com/openai/openai-realtime-console. The only change has been to replace `@openai/realtime-api-beta` with `openai-realtime-api`.
+
 # OpenAI Realtime Console
 
 The OpenAI Realtime Console is intended as an inspector and interactive API reference
@@ -28,17 +31,20 @@ It should be available via `localhost:3000`.
 
 # Table of contents
 
-1. [Using the console](#using-the-console)
-   1. [Using a relay server](#using-a-relay-server)
-1. [Realtime API reference client](#realtime-api-reference-client)
-   1. [Sending streaming audio](#sending-streaming-audio)
-   1. [Adding and using tools](#adding-and-using-tools)
-   1. [Interrupting the model](#interrupting-the-model)
-   1. [Reference client events](#reference-client-events)
-1. [Wavtools](#wavtools)
-   1. [WavRecorder quickstart](#wavrecorder-quickstart)
-   1. [WavStreamPlayer quickstart](#wavstreamplayer-quickstart)
-1. [Acknowledgements and contact](#acknowledgements-and-contact)
+- [OpenAI Realtime Console](#openai-realtime-console)
+- [Starting the console](#starting-the-console)
+- [Table of contents](#table-of-contents)
+- [Using the console](#using-the-console)
+  - [Using a relay server](#using-a-relay-server)
+- [Realtime API reference client](#realtime-api-reference-client)
+  - [Sending streaming audio](#sending-streaming-audio)
+  - [Adding and using tools](#adding-and-using-tools)
+  - [Interrupting the model](#interrupting-the-model)
+  - [Reference client events](#reference-client-events)
+- [Wavtools](#wavtools)
+  - [WavRecorder Quickstart](#wavrecorder-quickstart)
+  - [WavStreamPlayer Quickstart](#wavstreamplayer-quickstart)
+- [Acknowledgements and contact](#acknowledgements-and-contact)
 
 # Using the console
 
@@ -196,11 +202,11 @@ client.addTool(
   },
   async ({ lat, lng, location }) => {
     const result = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,wind_speed_10m`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,wind_speed_10m`,
     );
     const json = await result.json();
     return json;
-  }
+  },
 );
 ```
 
