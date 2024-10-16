@@ -26,9 +26,14 @@ export class RealtimeRelay {
 
   constructor({ client }: { client: RealtimeClient }) {
     assert(
+      client.relay,
+      'RealtimeRelay client must have the "relay" option set'
+    )
+    assert(
       client.realtime.apiKey,
       'RealtimeRelay client must have an API key set'
     )
+
     this.client = client
   }
 

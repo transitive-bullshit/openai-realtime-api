@@ -40,6 +40,9 @@ This package is [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908
 
 ## Usage
 
+> [!IMPORTANT]
+> All usage and events are 100% compatible with the [OpenAI JS version](https://github.com/openai/openai-realtime-api-beta). The main difference aside from bug fixes is that they are fully-typed. So check out their [readme](https://github.com/openai/openai-realtime-api-beta) for more detailed docs.
+
 ```ts
 import { RealtimeClient } from 'openai-realtime-api'
 
@@ -52,18 +55,16 @@ const client = new RealtimeClient({
   }
 })
 
-// Can set parameters ahead of connecting, either separately or all at once.
+// Can change session config ahead of connecting.
 client.updateSession({
   turn_detection: null,
   input_audio_transcription: { model: 'whisper-1' }
 })
 
-// Set up event handling
+// Example of custom event handling
 client.on('conversation.updated', (event) => {
   // All events are fully-typed based on the event name.
   // In this case, `event` will have the type `RealtimeCustomEvents.ConversationUpdatedEvent`
-  // `item` is the current item being updated.
-  // `delta` is optional for this event.
   const { item, delta } = event
 
   // Access the full list of conversation items.
@@ -80,9 +81,6 @@ client.sendUserMessageContent([{ type: 'input_text', text: 'How are you?' }])
 // (`event` will be of type `RealtimeServerEvents.ResponseDoneEvent`)
 const event = await client.realtime.waitForNext('response.done')
 ```
-
-> [!IMPORTANT]
-> All events are 100% compatible with [OpenAI JS version](https://github.com/openai/openai-realtime-api-beta). The only difference is that they are fully-typed. So check out their [readme](https://github.com/openai/openai-realtime-api-beta) for more detailed docs.
 
 See [examples](#examples) for more complete demos.
 
@@ -108,7 +106,7 @@ const relay = new RealtimeRelay({ client })
 relay.listen(8081)
 ```
 
-Note that the `RealtimeRelay` uses a different import path because it contains Node.js-specific code.
+Note that `RealtimeRelay` uses a different import path because it contains Node.js-specific code.
 
 A full example is included in `examples/node-relay-server.ts`.
 
