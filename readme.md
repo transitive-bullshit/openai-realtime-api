@@ -180,6 +180,8 @@ This example has been imported from https://github.com/openai/openai-realtime-co
 
 <img src="/examples/openai-realtime-console/readme/realtime-console-demo.png" width="800" />
 
+To run the realtime console example:
+
 ```sh
 pnpm install
 cd examples/openai-realtime-console
