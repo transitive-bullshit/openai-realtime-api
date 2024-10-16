@@ -25,7 +25,7 @@
 - [All events](./src/events.ts) and handlers are 100% typed
 - 100% drop-in replacement for OpenAI's JS version (same events and classes)
 - Fixes dozens of small bugs and inconsistencies
-  - https://github.com/openai/openai-realtime-api-beta/pull/11, https://github.com/openai/openai-realtime-api-beta/pull/34, https://github.com/openai/openai-realtime-api-beta/pull/29, https://github.com/openai/openai-realtime-api-beta/pull/17, https://github.com/openai/openai-realtime-api-beta/pull/37, https://github.com/openai/openai-realtime-api-beta/pull/44, https://github.com/openai/openai-realtime-api-beta/pull/43, https://github.com/openai/openai-realtime-api-beta/pull/35, https://github.com/openai/openai-realtime-api-beta/issues/3, https://github.com/openai/openai-realtime-api-beta/issues/14, and probably others.
+  - [#3](https://github.com/openai/openai-realtime-api-beta/issues/3), [#14](https://github.com/openai/openai-realtime-api-beta/issues/14), [#11](https://github.com/openai/openai-realtime-api-beta/pull/11), [#17](https://github.com/openai/openai-realtime-api-beta/pull/17), [#29](https://github.com/openai/openai-realtime-api-beta/pull/29), [#34](https://github.com/openai/openai-realtime-api-beta/pull/34), [#35](https://github.com/openai/openai-realtime-api-beta/pull/35), [#37](https://github.com/openai/openai-realtime-api-beta/pull/37), [#43](https://github.com/openai/openai-realtime-api-beta/pull/43), [#44](https://github.com/openai/openai-realtime-api-beta/pull/44), and likely others.
 - Published to NPM
 - Includes CLI examples for easy local testing
 - Includes a simple relay server (via a separate export)
