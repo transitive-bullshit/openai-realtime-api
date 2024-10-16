@@ -3,5 +3,6 @@
   "extends": ["@fisch0920/eslint-config/node"],
   "rules": {
     "unicorn/consistent-function-scoping": "off"
-  }
+  },
+  "ignorePatterns": ["examples/openai-realtime-console"]
 }
