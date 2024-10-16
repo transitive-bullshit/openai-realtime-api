@@ -33,6 +33,7 @@
 - Published to NPM
 - Includes CLI examples for easy local testing
 - Includes a simple relay server (via a separate export)
+- Includes the [OpenAI Realtime Console demo](#openai-realtime-console) using this package
 
 ## Install
 
