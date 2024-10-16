@@ -52,8 +52,8 @@ This package is [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908
 ```ts
 import { RealtimeClient } from 'openai-realtime-api'
 
-// Create a new client; all params are optional, and the apiKey defaults to the
-// `OPENAI_API_KEY` environment variable (when on Node.js).
+// Create a new client; all params are optional; apiKey defaults to the
+// `OPENAI_API_KEY` environment variable (when using Node.js).
 const client = new RealtimeClient({
   sessionConfig: {
     instructions: 'You are a great, upbeat friend.',
