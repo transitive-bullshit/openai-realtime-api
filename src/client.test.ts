@@ -5,7 +5,7 @@ import fs from 'node:fs/promises'
 import decodeAudio from 'audio-decode'
 import { expect, test } from 'vitest'
 
-import type { RealtimeServerEvents } from './events'
+import type { Event, RealtimeServerEvents } from './events'
 import { RealtimeClient } from './client'
 import { arrayBufferToBase64, trimDebugEvent } from './utils'
 
@@ -26,7 +26,7 @@ test(
     timeout: 60_000
   },
   async () => {
-    const events: any[] = []
+    const events: Event[] = []
     const client = new RealtimeClient({
       debug: true,
       sessionConfig: {
@@ -37,9 +37,8 @@ test(
       }
     })
 
-    client.on('realtime.event', (event: any) => {
-      const e = trimDebugEvent(event.event)
-      events.push(e)
+    client.on('realtime.event', (event) => {
+      events.push(trimDebugEvent(event.event))
     })
 
     expect(client.isConnected).toBe(false)

@@ -180,25 +180,25 @@ export namespace Realtime {
     content: ContentPart[]
   }
 
-  export interface SystemItem extends BaseItem {
+  export interface SystemItem {
     role: 'system'
     type: 'message'
     content: InputTextContentPart[]
   }
 
-  export interface UserItem extends BaseItem {
+  export interface UserItem {
     role: 'user'
     type: 'message'
     content: Array<InputTextContentPart | InputAudioContentPart>
   }
 
-  export interface AssistantItem extends BaseItem {
+  export interface AssistantItem {
     role: 'assistant'
     type: 'message'
     content: Array<TextContentPart | AudioContentPart>
   }
 
-  export interface FunctionCallItem extends BaseItem {
+  export interface FunctionCallItem {
     type: 'function_call'
 
     /** The ID of the function call. */
@@ -211,7 +211,7 @@ export namespace Realtime {
     arguments: string
   }
 
-  export interface FunctionCallOutputItem extends BaseItem {
+  export interface FunctionCallOutputItem {
     type: 'function_call_output'
 
     /** The ID of the function call. */
@@ -221,7 +221,16 @@ export namespace Realtime {
     output: string
   }
 
-  export type Item =
+  export type Item = BaseItem &
+    (
+      | SystemItem
+      | UserItem
+      | AssistantItem
+      | FunctionCallItem
+      | FunctionCallOutputItem
+    )
+
+  export type ClientItem =
     | SystemItem
     | UserItem
     | AssistantItem

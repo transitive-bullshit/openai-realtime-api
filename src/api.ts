@@ -2,7 +2,11 @@ import type { ClientRequest } from 'node:http'
 
 import type { WebSocket as WS } from 'ws'
 
-import type { RealtimeClientEvents, RealtimeServerEvents } from './events'
+import type {
+  Event,
+  RealtimeClientEvents,
+  RealtimeServerEvents
+} from './events'
 import { RealtimeEventHandler } from './event-handler'
 import {
   generateId,
@@ -16,7 +20,26 @@ import {
  * The RealtimeAPI class handles low-level communication with the OpenAI
  * Realtime API via WebSockets.
  */
-export class RealtimeAPI extends RealtimeEventHandler {
+export class RealtimeAPI extends RealtimeEventHandler<
+  | RealtimeClientEvents.EventType
+  | RealtimeServerEvents.EventType
+  | 'close'
+  | `client.${RealtimeClientEvents.EventType}`
+  | `server.${RealtimeServerEvents.EventType}`
+  | 'client.*'
+  | 'server.*',
+  Event,
+  RealtimeClientEvents.EventMap &
+    RealtimeServerEvents.EventMap &
+    RealtimeClientEvents.PrefixedEventMap &
+    RealtimeServerEvents.PrefixedEventMap & {
+      'client.*': RealtimeClientEvents.ClientEvent
+    } & {
+      'server.*': RealtimeServerEvents.ServerEvent
+    } & {
+      close: { type: 'close'; error: boolean }
+    }
+> {
   readonly model: string
   readonly url: string
   readonly apiKey?: string
@@ -112,13 +135,13 @@ export class RealtimeAPI extends RealtimeEventHandler {
           ws.addEventListener('error', () => {
             this.disconnect(ws)
             this._log(`Error, disconnected from "${this.url}"`)
-            this.dispatch('close', { error: true })
+            this.dispatch('close', { type: 'close', error: true })
           })
 
           ws.addEventListener('close', () => {
             this.disconnect(ws)
             this._log(`Disconnected from "${this.url}"`)
-            this.dispatch('close', { error: false })
+            this.dispatch('close', { type: 'close', error: false })
           })
 
           this.ws = ws
@@ -164,13 +187,13 @@ export class RealtimeAPI extends RealtimeEventHandler {
           ws.on('error', () => {
             this._log(`Error, disconnected from "${this.url}"`)
             this.disconnect(ws)
-            this.dispatch('close', { error: true })
+            this.dispatch('close', { type: 'close', error: true })
           })
 
           ws.on('close', () => {
             this.disconnect(ws)
             this._log(`Disconnected from "${this.url}"`)
-            this.dispatch('close', { error: false })
+            this.dispatch('close', { type: 'close', error: false })
           })
 
           this.ws = ws
@@ -193,7 +216,13 @@ export class RealtimeAPI extends RealtimeEventHandler {
   /**
    * Receives an event from WebSocket and dispatches related events.
    */
-  receive(eventName: RealtimeServerEvents.ServerEventType, event: any) {
+  receive<
+    E extends RealtimeServerEvents.EventType,
+    D extends
+      RealtimeServerEvents.ServerEvent = RealtimeServerEvents.EventMap[E] extends RealtimeServerEvents.ServerEvent
+      ? RealtimeServerEvents.EventMap[E]
+      : RealtimeServerEvents.ServerEvent
+  >(eventName: E, event: D) {
     this._log('received:', eventName, event)
     this.dispatch(eventName, event)
     this.dispatch(`server.${eventName}`, event)
@@ -203,7 +232,13 @@ export class RealtimeAPI extends RealtimeEventHandler {
   /**
    * Sends an event to the underlying WebSocket and dispatches related events.
    */
-  send(eventName: RealtimeClientEvents.ClientEventType, data: any = {}) {
+  send<
+    E extends RealtimeClientEvents.EventType,
+    D extends
+      RealtimeClientEvents.ClientEvent = RealtimeClientEvents.EventMap[E] extends RealtimeClientEvents.ClientEvent
+      ? RealtimeClientEvents.EventMap[E]
+      : RealtimeClientEvents.ClientEvent
+  >(eventName: E, data: Omit<D, 'type'> = {} as any) {
     if (!this.isConnected) {
       throw new Error(`RealtimeAPI is not connected`)
     }

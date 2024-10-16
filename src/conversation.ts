@@ -87,7 +87,7 @@ export class RealtimeConversation {
   /** Event handlers. */
   EventProcessors: Partial<
     Record<
-      RealtimeServerEvents.ServerEventType,
+      RealtimeServerEvents.EventType,
       (...args: any[]) => EventHandlerResult
     >
   > = {

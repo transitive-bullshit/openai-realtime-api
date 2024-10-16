@@ -1,4 +1,4 @@
-import type { Realtime } from './types'
+import type { EventHandlerResult, FormattedItem, Realtime } from './types'
 
 export interface Event {
   /** The event type. */
@@ -8,7 +8,7 @@ export interface Event {
 // See https://platform.openai.com/docs/guides/realtime/events
 export namespace RealtimeClientEvents {
   /** Event types sent by the client. */
-  export type ClientEventType =
+  export type EventType =
     | 'session.update'
     | 'input_audio_buffer.append'
     | 'input_audio_buffer.commit'
@@ -19,7 +19,7 @@ export namespace RealtimeClientEvents {
     | 'response.create'
     | 'response.cancel'
 
-  export type ClientEventMap = {
+  export type EventMap = {
     'session.update': SessionUpdateEvent
     'input_audio_buffer.append': InputAudioBufferAppendEvent
     'input_audio_buffer.commit': InputAudioBufferCommitEvent
@@ -31,9 +31,13 @@ export namespace RealtimeClientEvents {
     'response.cancel': ResponseCancelEvent
   }
 
+  export type PrefixedEventMap = {
+    [K in keyof EventMap as `client.${Extract<K, string>}`]: EventMap[K]
+  }
+
   export interface ClientEvent extends Event {
     /** The event type. */
-    type: ClientEventType
+    type: EventType
 
     /** Optional client-generated ID used to identify this event. */
     event_id?: string
@@ -73,7 +77,7 @@ export namespace RealtimeClientEvents {
     previous_item_id?: string
 
     /** The item to add to the conversation. */
-    item?: Realtime.Item
+    item?: Realtime.ClientItem
   }
 
   /**
@@ -119,7 +123,7 @@ export namespace RealtimeClientEvents {
 // See // See https://platform.openai.com/docs/guides/realtime/events
 export namespace RealtimeServerEvents {
   /** Event types sent by the server. */
-  export type ServerEventType =
+  export type EventType =
     | 'error'
     | 'session.created'
     | 'session.updated'
@@ -149,7 +153,7 @@ export namespace RealtimeServerEvents {
     | 'response.function_call_arguments.done'
     | 'rate_limits.updated'
 
-  export type ServerEventMap = {
+  export type EventMap = {
     error: ErrorEvent
     'session.created': SessionCreatedEvent
     'session.updated': SessionUpdatedEvent
@@ -180,9 +184,13 @@ export namespace RealtimeServerEvents {
     'rate_limits.updated': RateLimitsUpdatedEvent
   }
 
+  export type PrefixedEventMap = {
+    [K in keyof EventMap as `server.${Extract<K, string>}`]: EventMap[K]
+  }
+
   export interface ServerEvent extends Event {
     /** The event type. */
-    type: ServerEventType
+    type: EventType
 
     /** The unique ID of the server event. */
     event_id: string
@@ -643,5 +651,73 @@ export namespace RealtimeServerEvents {
 
     /** Array of rate limit information. */
     rate_limits: Realtime.RateLimit[]
+  }
+}
+
+export namespace RealtimeCustomEvents {
+  /** Custom event types that are not part of the official realtime API. */
+  export type EventType =
+    | 'conversation.item.appended'
+    | 'conversation.item.completed'
+    | 'conversation.updated'
+    | 'conversation.interrupted'
+    | 'realtime.event'
+
+  export type EventMap = {
+    'conversation.item.appended': ConversationItemAppendedEvent
+    'conversation.item.completed': ConversationItemCompletedEvent
+    'conversation.updated': ConversationUpdatedEvent
+    'conversation.interrupted': ConversationInterruptedEvent
+    'realtime.event':
+      | CustomServerEvent<RealtimeServerEvents.EventType>
+      | CustomClientEvent<RealtimeClientEvents.EventType>
+  }
+
+  export interface CustomEvent extends Event {
+    /** The custom event type. */
+    type: EventType
+  }
+
+  export type CustomServerEvent<T extends RealtimeServerEvents.EventType> =
+    Event & {
+      type: 'realtime.event'
+      source: 'server'
+      time: string
+      event: RealtimeServerEvents.EventMap[T]
+    }
+
+  export type CustomClientEvent<T extends RealtimeClientEvents.EventType> =
+    Event & {
+      type: 'realtime.event'
+      source: 'client'
+      time: string
+      event: RealtimeClientEvents.EventMap[T]
+    }
+
+  export interface ConversationItemAppendedEvent
+    extends CustomEvent,
+      Omit<EventHandlerResult, 'item'> {
+    type: 'conversation.item.appended'
+    item: FormattedItem
+  }
+
+  export interface ConversationItemCompletedEvent
+    extends CustomEvent,
+      Omit<EventHandlerResult, 'item'> {
+    type: 'conversation.item.completed'
+    item: FormattedItem
+  }
+
+  export interface ConversationUpdatedEvent
+    extends CustomEvent,
+      Omit<EventHandlerResult, 'item'> {
+    type: 'conversation.updated'
+    item: FormattedItem
+  }
+
+  export interface ConversationInterruptedEvent
+    extends CustomEvent,
+      Omit<RealtimeServerEvents.InputAudioBufferSpeechStartedEvent, 'type'> {
+    type: 'conversation.interrupted'
   }
 }

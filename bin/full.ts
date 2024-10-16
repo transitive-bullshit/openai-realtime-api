@@ -5,7 +5,7 @@ import { Readable } from 'node:stream'
 import microphone from 'mic'
 import Speaker from 'speaker'
 
-import { type FormattedItem, getEnv, RealtimeClient } from '../src'
+import { getEnv, RealtimeClient } from '../src'
 
 async function main() {
   const client = new RealtimeClient({
@@ -25,23 +25,20 @@ async function main() {
   let speaker: Speaker | undefined
   startAudioStream()
 
-  client.on(
-    'conversation.item.completed',
-    ({ item }: { item: FormattedItem }) => {
-      const { formatted: _, ...rest } = item
-      console.log('Conversation item completed:', rest)
+  client.on('conversation.item.completed', ({ item }) => {
+    const { formatted: _, ...rest } = item
+    console.log('Conversation item completed:', rest)
 
-      if (
-        item.type === 'message' &&
-        item.role === 'assistant' &&
-        item.formatted &&
-        item.formatted.audio
-      ) {
-        console.log(`Playing audio response... "${item.formatted.transcript}"`)
-        playAudio(item.formatted.audio)
-      }
+    if (
+      item.type === 'message' &&
+      item.role === 'assistant' &&
+      item.formatted &&
+      item.formatted.audio
+    ) {
+      console.log(`Playing audio response... "${item.formatted.transcript}"`)
+      playAudio(item.formatted.audio)
     }
-  )
+  })
 
   function startAudioStream() {
     try {
