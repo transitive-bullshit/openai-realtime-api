@@ -33,8 +33,8 @@
 - Published to NPM
 - Supports Node.js, browser, deno, bun, CF workers, etc
 - Includes Node.js CLI examples for easy local testing
-- Includes a simple relay server (via a separate export)
-- Includes the [OpenAI Realtime Console demo](#openai-realtime-console) using this package
+- Includes a simple relay server
+- Includes the [OpenAI Realtime Console demo](#openai-realtime-console) using this package 🔥
 
 ## Install
 
