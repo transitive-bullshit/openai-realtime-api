@@ -13,7 +13,7 @@ import { assert, getEnv } from '../utils'
  *
  * ```ts
  * import { RealtimeClient } from 'openai-realtime-api'
- * import { RealtimeRelay } from 'openai-realtime-api/relay-server'
+ * import { RealtimeRelay } from 'openai-realtime-api/node'
  *
  * const client = new RealtimeClient({ relay: true })
  * const relay = new RealtimeRelay({ client })
