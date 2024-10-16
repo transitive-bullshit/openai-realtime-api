@@ -7,6 +7,9 @@ import Speaker from 'speaker'
 
 import { getEnv, RealtimeClient } from '../src'
 
+/**
+ * Demo using the RealtimeClient with a microphone and speaker from the terminal.
+ */
 async function main() {
   const client = new RealtimeClient({
     debug: !!getEnv('REALTIME_DEBUG'),
