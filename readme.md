@@ -27,10 +27,11 @@
 
 - **Strongly typed** TS fork of [openai/openai-realtime-api-beta](https://github.com/openai/openai-realtime-api-beta)
 - [All events](./src/events.ts) and handlers are 100% typed
-- Drop-in replacement for OpenAI's JS version
-- Fixes dozens of small bugs and inconsistencies
+- **Drop-in replacement for OpenAI's JS version**
+- Fixes many small bugs and inconsistencies
   - ([#3](https://github.com/openai/openai-realtime-api-beta/issues/3), [#14](https://github.com/openai/openai-realtime-api-beta/issues/14), [#11](https://github.com/openai/openai-realtime-api-beta/pull/11), [#17](https://github.com/openai/openai-realtime-api-beta/pull/17), [#29](https://github.com/openai/openai-realtime-api-beta/pull/29), [#34](https://github.com/openai/openai-realtime-api-beta/pull/34), [#35](https://github.com/openai/openai-realtime-api-beta/pull/35), [#37](https://github.com/openai/openai-realtime-api-beta/pull/37), [#43](https://github.com/openai/openai-realtime-api-beta/pull/43), [#44](https://github.com/openai/openai-realtime-api-beta/pull/44), and likely others)
-- Published to NPM
+- Available on NPM
+- Supports Node.js, browser, deno, bun, CF workers, etc
 - Includes CLI examples for easy local testing
 - Includes a simple relay server (via a separate export)
 - Includes the [OpenAI Realtime Console demo](#openai-realtime-console) using this package
@@ -41,7 +42,7 @@
 npm install openai-realtime-api
 ```
 
-This package is [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). It requires `Node.js >= 18`, a browser environment, or a modern JS/TS runtime (Deno, Bun, CF workers, etc).
+This package is [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). It requires `Node.js >= 18`, a browser environment, or an equivalent JS runtime (Deno, Bun, CF workers, etc).
 
 ## Usage
 
