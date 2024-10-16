@@ -182,6 +182,8 @@ export class RealtimeClient extends RealtimeEventHandler<
           }
         })
       } catch (err: any) {
+        console.warn(`Error calling tool "${tool.name}":`, err.message)
+
         this.realtime.send('conversation.item.create', {
           item: {
             type: 'function_call_output',
