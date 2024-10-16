@@ -171,9 +171,9 @@ Simple Node.js demo using the `RealtimeClient` which sends a short audio message
 
 Simple Node.js demo using the `RealtimeClient` with a microphone and speaker to simulate a full, back & forth conversation from the terminal.
 
-This demo uses the [mic](https://github.com/ashishbajaj99/mic) and [speaker](https://github.com/TooTallNate/node-speaker) npm packages. `mic` requires [sox](https://sourceforge.net/projects/sox/). On macOS, you can run `brew install sox`.
-
 - [examples/node/convo.ts](./examples/node/convo.ts)
+- This demo uses the [mic](https://github.com/ashishbajaj99/mic) and [speaker](https://github.com/TooTallNate/node-speaker) npm packages
+- `mic` requires [sox](https://sourceforge.net/projects/sox/); on macOS, you can run `brew install sox`
 - `npx tsx examples/node/convo.ts`
 
 ### OpenAI Realtime Console
