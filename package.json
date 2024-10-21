@@ -13,7 +13,8 @@
     "node": ">=18"
   },
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "sideEffects": false,
