@@ -93,7 +93,7 @@ export class RealtimeAPI extends RealtimeEventHandler<
       return
     }
 
-    if (!this.apiKey) {
+    if (!this.apiKey && !isBrowser) {
       console.warn(`No apiKey provided for connection to "${this.url}"`)
     }
 
