@@ -22,7 +22,7 @@ importers:
         specifier: ^0.6.1
         version: 0.6.1
       '@types/node':
-        specifier: ^22.4.0
+        specifier: ^22.7.5
         version: 22.7.5
       '@types/ws':
         specifier: ^8.5.12
@@ -37,7 +37,7 @@ importers:
         specifier: ^8.57.0
         version: 8.57.1
       npm-run-all2:
-        specifier: ^6.2.2
+        specifier: ^6.2.3
         version: 6.2.3
       only-allow:
         specifier: ^1.2.1
@@ -78,7 +78,7 @@ importers:
     dependencies:
       '@openai/realtime-api-beta':
         specifier: github:openai/openai-realtime-api-beta
-        version: https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/339e9553a757ef1cf8c767272fc750c1e62effbb
+        version: https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/cd8a9251dcfb0cba0d7b0501e9ff36c915f5090f
       '@testing-library/jest-dom':
         specifier: ^5.17.0
         version: 5.17.0
@@ -1419,8 +1419,8 @@ packages:
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
 
-  '@openai/realtime-api-beta@https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/339e9553a757ef1cf8c767272fc750c1e62effbb':
-    resolution: {tarball: https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/339e9553a757ef1cf8c767272fc750c1e62effbb}
+  '@openai/realtime-api-beta@https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/cd8a9251dcfb0cba0d7b0501e9ff36c915f5090f':
+    resolution: {tarball: https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/cd8a9251dcfb0cba0d7b0501e9ff36c915f5090f}
     version: 0.0.0
 
   '@parcel/watcher-android-arm64@2.4.1':
@@ -8191,7 +8191,7 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@openai/realtime-api-beta@https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/339e9553a757ef1cf8c767272fc750c1e62effbb':
+  '@openai/realtime-api-beta@https://codeload.github.com/openai/openai-realtime-api-beta/tar.gz/cd8a9251dcfb0cba0d7b0501e9ff36c915f5090f':
     dependencies:
       ws: 8.18.0
     transitivePeerDependencies:
