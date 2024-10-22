@@ -31,6 +31,10 @@ export class RealtimeConversation {
     frequency?: number
     debug?: boolean
   } = {}) {
+    // Default to 24,000 Hz if not provided
+    if (frequency === undefined) {
+      frequency = this.defaultFrequency
+    }
     assert(frequency > 0, `Invalid frequency: ${frequency}`)
 
     this.frequency = frequency
