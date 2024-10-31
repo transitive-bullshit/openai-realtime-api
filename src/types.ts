@@ -7,7 +7,7 @@ export namespace Realtime {
   export type ItemStatus = 'in_progress' | 'completed' | 'incomplete'
   export type ContentPartType = 'input_text' | 'input_audio' | 'text' | 'audio'
 
-  export type Voice = 'alloy' | 'shimmer' | 'echo'
+  export type Voice = 'alloy' | 'ash' | 'ballad' | 'coral' | 'echo' | 'sage' | 'shimmer' | 'verse' | (string & {})
 
   export type ToolChoice =
     | 'auto'
