@@ -71,7 +71,7 @@ export class RealtimeRelay {
       return
     }
 
-    const url = new URL(req.url)
+    const url = new URL(req.url, `http://${req.headers.host}`)
     const pathname = url.pathname
 
     if (pathname !== '/') {
